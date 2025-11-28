@@ -45,6 +45,37 @@
 * 감에 의존한 창업을 방지하여 자영업자 폐업률 감소에 기여.
 * 공공 데이터를 시각화함으로써 정보의 비대칭성 해소.
 
+# 백엔드 패키지 구조 (Package Structure)
+```
+src/main/java/com/BACK
+├── global                  # 프로젝트 전반에 공통으로 쓰이는 설정 및 유틸리티
+│   ├── config              # 설정 클래스 (Security, CORS, Swagger, QueryDSL 등)
+│   ├── auth                # JWT, 로그인 관련 로직 (Security Filter, UserDetail 등)
+│   ├── error               # Global Exception Handling (GlobalExceptionHandler, ErrorCode)
+│   └── util                # 정적 유틸리티 클래스 (날짜 계산, 점수 산출 공식 등)
+│
+├── domain                  # [Entity] 데이터베이스 테이블과 매핑되는 핵심 클래스 (현재 구현됨)
+│   ├── common              # BaseTimeEntity 등 공통 엔티티
+│   ├── member              # 회원 (User/Member)
+│   ├── region              # Region (지역)
+│   ├── market              # MarketStats (상권 통계)
+│   ├── franchise           # Franchise (프랜차이즈)
+│   └── guide               # StartupGuide (창업 가이드)
+│
+├── dto                     # [Data Transfer Object] 계층 간 데이터 교환 객체 (Entity 직접 노출 X)
+│   ├── request             # API 요청 데이터 (예: SignupRequest, AnalysisRequest)
+│   └── response            # API 응답 데이터 (예: RankResponse, MarketDetailResponse)
+│
+├── repository              # [Repository] DB 접근 계층 (JPA Repository)
+│
+├── service                 # [Service] 핵심 비즈니스 로직 (트랜잭션 관리)
+│   ├── auth                # 로그인, 회원가입 서비스
+│   ├── analysis            # ★핵심: 점수 계산, 상권 등급 판별 로직
+│   └── market              # 기본 CRUD 및 데이터 조회 서비스
+│
+└── controller              # [Controller] 웹 요청 처리 및 응답 (API Endpoints)
+```
 
+# 추후 예정
 
-
+1.  **Swagger 활용:** Spring Boot를 사용 중이시므로 `springdoc-openapi-starter-webmvc-ui` 의존성을 추가하여 이 명세서를 자동으로 시각화한 화면을 캡처
