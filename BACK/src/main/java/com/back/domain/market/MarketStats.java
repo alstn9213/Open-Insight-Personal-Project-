@@ -1,6 +1,9 @@
-package com.BACK.domain;
+package com.back.domain.market;
 
-import com.BACK.domain.common.BaseTimeEntity;
+import com.back.domain.category.Category;
+import com.back.domain.common.BaseTimeEntity;
+import com.back.domain.region.Region;
+import com.back.domain.type.MarketGrade;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -43,9 +46,7 @@ public class MarketStats extends BaseTimeEntity {
 
     // 시장 등급 (RED, YELLOW, GREEN)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private MarketGrade marketGrade;
 
-    public enum MarketGrade {
-        RED, YELLOW, GREEN
-    }
 }

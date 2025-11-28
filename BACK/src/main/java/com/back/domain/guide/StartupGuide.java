@@ -1,5 +1,6 @@
-package com.BACK.domain;
+package com.back.domain.guide;
 
+import com.back.domain.category.Category;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

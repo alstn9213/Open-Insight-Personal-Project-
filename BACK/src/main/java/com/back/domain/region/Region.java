@@ -1,4 +1,4 @@
-package com.BACK.domain;
+package com.back.domain.region;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;
