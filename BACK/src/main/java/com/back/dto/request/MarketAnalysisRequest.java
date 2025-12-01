@@ -9,7 +9,7 @@ public record MarketAnalysisRequest(
         @NotNull(message = "업종 ID는 필수입니다.")
         Long categoryId,      // 예: 1 (한식), 2 (카페)
 
-        // 가중치 커스텀 옵션 (선택 사항)
+        // 가중치 커스텀 옵션
         WeightOption weightOption
 ) {
     public record WeightOption(

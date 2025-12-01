@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "franchises")
 public class Franchise {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "franchise_id")
     private Long id;
 

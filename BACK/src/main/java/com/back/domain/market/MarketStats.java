@@ -15,7 +15,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "market_stats")
 public class MarketStats extends BaseTimeEntity {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "stats_id")
     private Long id;
 

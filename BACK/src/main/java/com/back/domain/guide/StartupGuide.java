@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "startup_guides")
 public class StartupGuide {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "guide_id")
     private Long id;
 

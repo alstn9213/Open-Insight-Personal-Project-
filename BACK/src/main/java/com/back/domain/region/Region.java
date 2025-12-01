@@ -24,7 +24,7 @@ public class Region {
     @Column(nullable = false)
     private String district;
 
-    // 행정동 코드 (공공데이터 연동용)
+    @Column(name = "adm_code", unique = true)
     private String admCode;
 
 }
