@@ -1,0 +1,37 @@
+[
+  {
+    "rank": 1,
+    "regionName": "서울특별시 마포구",
+    "categoryName": "베이커리",
+    "totalScore": 92.5,
+    "badge": "수익성 BEST"
+  },
+  {
+    "rank": 2,
+    "regionName": "서울특별시 송파구",
+    "categoryName": "편의점",
+    "totalScore": 88.2,
+    "badge": "안전성 BEST"
+  },
+  {
+    "rank": 3,
+    "regionName": "서울특별시 강남구",
+    "categoryName": "카페",
+    "totalScore": 85.4,
+    "badge": null
+  },
+  {
+    "rank": 4,
+    "regionName": "부산광역시 해운대구",
+    "categoryName": "한식",
+    "totalScore": 81.0,
+    "badge": "인기 급상승"
+  },
+  {
+    "rank": 5,
+    "regionName": "경기도 성남시",
+    "categoryName": "치킨",
+    "totalScore": 78.9,
+    "badge": null
+  }
+]
