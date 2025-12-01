@@ -1,4 +1,11 @@
 import pandas as pd
+import sys
+import os
+
+current_dir = os.path.dirname(os.path.abspath(__file__)) # .../src/etl
+project_root = os.path.abspath(os.path.join(current_dir, "../../")) # .../DATA (두 단계 위로)
+sys.path.append(project_root)
+
 from src.config.database import get_connection
 
 def init_basic_data():
@@ -6,11 +13,13 @@ def init_basic_data():
   
   # 업종 코드와 매핑될 기준
   categories = pd.DataFrame({
+    'category_id': [1, 2, 3, 4, 5],
     'name': ['한식', '카페', '치킨', '편의점', '베이커리']
   })
   
   # 지역 데이터
   regions = pd.DataFrame({
+    'region_id': [1, 2, 3],
     'province': ['서울특별시', '서울특별시', '부산광역시'],
     'district': ['강남구', '마포구', '해운대구'],
     'adm_code': ['11680', '11440', '26350']
