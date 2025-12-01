@@ -3,7 +3,7 @@
 ## 1. 개요 (Overview)
 
   * **프로젝트명:** Open Insight (데이터 기반 상권 분석 및 컨설팅 플랫폼)
-  * **Base URL:** `http://localhost:8080/api/v1` (예시)
+  * **Base URL:** `http://localhost:8080/api` (예시)
   * **Content-Type:** `application/json; charset=UTF-8`
   * **인증 방식:** Bearer Token (JWT)
 

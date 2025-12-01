@@ -77,8 +77,7 @@ FRONT
 
 ### 🚀 지금 바로 할 일
 
-VS Code에서 `src` 폴더 안에 위 구조대로 폴더들을 쭉 생성해 주세요.
-그 다음 `npm install react-router-dom`
+`npm install react-router-dom`
 
 -----
 
