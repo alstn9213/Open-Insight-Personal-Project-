@@ -1,24 +1,24 @@
 import os
 import sys
 import random
-import time
-import requests
+# import time
+# import requests
 import pandas as pd
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) # .../src/etl
 project_root = os.path.abspath(os.path.join(current_dir, "../../")) # .../DATA (두 단계 위로)
 sys.path.append(project_root)
-from src.config.database import get_connection
+# from src.config.database import get_connection
+from src.config.database import db_connection
 
 def fetch_store_data():
-  conn = get_connection()
   
   try:
     print("상권 분석 데이터 생성 및 적재 시작...")
 
-    regions_df = pd.read_sql("SELECT region_id FROM regions", conn)
-    categories_df = pd.read_sql("SELECT category_id FROM categories", conn)
+    regions_df = pd.read_sql("SELECT region_id FROM regions", db_connection)
+    categories_df = pd.read_sql("SELECT category_id FROM categories", db_connection)
     
     if regions_df.empty or categories_df.empty:
       print("기초 데이터(Region/Category)가 없습니다. init_data.py를 먼저 실행하세요.")
@@ -58,13 +58,11 @@ def fetch_store_data():
         })
 
     df = pd.DataFrame(market_data_list)
-
-    df.to_sql(name='market_stats', con=conn, if_exists='append', index=False)
+    df.to_sql(name='market_stats', con=db_connection, if_exists='append', index=False)
     print(f"총 {len(df)}건의 상권 분석 데이터 적재 완료!")
+    
   except Exception as e:
     print(f"데이터 적재 중 오류 발생: {e}")
-  finally:
-    conn.close()
     
 if __name__ == "__main__":
   fetch_store_data()
