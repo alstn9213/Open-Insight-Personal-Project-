@@ -4,13 +4,13 @@ import random
 # import time
 # import requests
 import pandas as pd
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
+from src.config.database import db_connection
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) # .../src/etl
 project_root = os.path.abspath(os.path.join(current_dir, "../../")) # .../DATA (두 단계 위로)
 sys.path.append(project_root)
-# from src.config.database import get_connection
-from src.config.database import db_connection
+
 
 def fetch_store_data():
   
