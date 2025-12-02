@@ -2,7 +2,7 @@ import os
 import sys
 import random
 import time
-import requests
+# import requests
 import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import text
@@ -20,7 +20,6 @@ API_URL = os.getenv("PUBLIC_DATA_API_URL")
 def fetch_store_data():
   try:
     print("상권 분석 데이터 생성 및 적재 시작...")
-
     with db_connection.connect() as conn:
       regions_df = pd.read_sql(text("SELECT region_id, adm_code, province, district FROM regions"), conn)
       categories_df = pd.read_sql(text("SELECT category_id, name FROM categories"), conn)
@@ -28,17 +27,14 @@ def fetch_store_data():
       # 중복 방지 로직
       today_str = pd.Timestamp.now().strftime('%Y-%m-%d')
       print(f"오늘({today_str}) 적재된 데이터가 있는지 확인합니다...")
-      
-      check_query = text("""
+      check_query = text(
+              """
                 SELECT region_id, category_id
                 FROM market_stats
                 WHERE DATE(created_at) = :today
-            """)
+              """)
       result = conn.execute(check_query, {'today': today_str}).fetchall()
-        
-        # 빠른 조회를 위해 집합(Set)으로 변환: {(1, 1), (1, 2), ...}
-      existing_pairs = set((row[0], row[1]) for row in result)
-        
+      existing_pairs = set((row[0], row[1]) for row in result) # 빠른 조회를 위해 집합(Set)으로 변환
     print(f"적재 데이터: {len(existing_pairs)}건 (중복 수집 건너뜀)")
     
     if regions_df.empty or categories_df.empty:
@@ -52,8 +48,7 @@ def fetch_store_data():
     for _, region in regions_df.iterrows():
       for _, category in categories_df.iterrows():
         current_step += 1
-        # [중복 체크] 이미 DB에 있으면 스킵
-        if (region['region_id'], category['category_id']) in existing_pairs:
+        if (region['region_id'], category['category_id']) in existing_pairs: # 이미 DB에 있으면 스킵
           print(f"[{current_step}/{total_steps}] [Skip] {region['district']} - {category['name']} (이미 존재함)")
           continue
         print(f"[{current_step}/{total_steps}] {region['province']} {region['district']} - {category['name']} 데이터 수집 중...")
@@ -71,7 +66,6 @@ def fetch_store_data():
         # 업종 키워드로 검색이 안되므로, 간단히 'store_count'를 API에서 가져왔다고 가정하거나,
         # 포트폴리오용으로 API가 실패할 경우를 대비해 랜덤값으로 fallback 처리를 해둡니다.
         # (실제로는 업종코드 매핑 테이블이 필요함: '카페' -> 'Q12' 등)
-        
         real_store_count = 0
         try:
           response = requests.get(API_URL, params=params, timeout=5)
