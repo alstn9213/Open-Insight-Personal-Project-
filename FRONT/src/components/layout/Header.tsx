@@ -12,7 +12,6 @@ const Header = () => {
         <ul className="menu menu-horizontal px-1 font-medium">
           <li><Link to="/analysis">상권분석</Link></li>
           <li><Link to="/ranking">창업순위</Link></li>
-          <li><Link to="/franchise">프랜차이즈비교</Link></li>
           <li><Link to="/guide">창업가이드</Link></li>
         </ul>
       </div>
