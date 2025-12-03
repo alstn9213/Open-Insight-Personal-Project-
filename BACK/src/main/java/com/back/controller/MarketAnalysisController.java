@@ -2,6 +2,7 @@ package com.back.controller;
 
 import com.back.dto.request.MarketAnalysisRequest;
 import com.back.dto.response.MarketDetailResponse;
+import com.back.dto.response.MarketMapResponse;
 import com.back.dto.response.StartupRankingResponse;
 import com.back.service.analysis.MarketAnalysisService;
 import jakarta.validation.Valid;
@@ -34,6 +35,16 @@ public class MarketAnalysisController {
             @Valid @RequestBody MarketAnalysisRequest request) {
         List<StartupRankingResponse> rankings = marketAnalysisService.recommendStartups(request);
         return ResponseEntity.ok(rankings);
+    }
+
+    // 지도 데이터 조회용 DTO (MarketMapResponse) 생성 필요
+    @GetMapping("/map-info")
+    public ResponseEntity<List<MarketMapResponse>> getMapInfo(
+            @RequestParam("province") String province,
+            @RequestParam("categoryId") Long categoryId) {
+
+        List<MarketMapResponse> mapInfo = marketAnalysisService.getMapInfo(province, categoryId);
+        return ResponseEntity.ok(mapInfo);
     }
 
 }

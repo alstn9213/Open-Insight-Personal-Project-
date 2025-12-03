@@ -30,4 +30,10 @@ public interface MarketStatsRepository extends JpaRepository<MarketStats, Long> 
             "JOIN FETCH m.region r " +
             "JOIN FETCH m.category c")
     List<MarketStats> findAllWithDetails();
+
+    @Query("SELECT m FROM MarketStats m " +
+            "JOIN FETCH m.region r " +
+            "WHERE r.province = :province AND m.category.id = :categoryId")
+    List<MarketStats> findAllByProvinceAndCategoryId(@Param("province") String province,
+                                                     @Param("categoryId") Long categoryId);
 }

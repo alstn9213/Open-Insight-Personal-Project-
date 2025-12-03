@@ -3,6 +3,7 @@ package com.back.service.analysis;
 import com.back.domain.market.MarketStats;
 import com.back.dto.request.MarketAnalysisRequest;
 import com.back.dto.response.MarketDetailResponse;
+import com.back.dto.response.MarketMapResponse;
 import com.back.dto.response.StartupRankingResponse;
 import com.back.repository.MarketStatsRepository;
 import lombok.RequiredArgsConstructor;
@@ -80,6 +81,21 @@ public class MarketAnalysisService {
                 }));
     }
 
+    /**
+     * 지도 시각화용 데이터 조회 (Map Overlay)
+     * 특정 광역자치단체(province) 내의 모든 구/군별 통계 데이터를 반환합니다.
+     */
+    public List<MarketMapResponse> getMapInfo(String province, Long categoryId) {
+        List<MarketStats> statsList = marketStatsRepository.findAllByProvinceAndCategoryId(province, categoryId);
+
+        return statsList.stream()
+                .map(MarketMapResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    /**
+    *[내부 메서드]
+    */
     private double calculateScore(MarketStats stats, MarketAnalysisRequest.WeightOption weights) {
         double salesScore = (stats.getAverageSales() / 10000.0);
 

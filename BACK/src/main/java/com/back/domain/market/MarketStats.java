@@ -42,8 +42,7 @@ public class MarketStats extends BaseTimeEntity {
     // 평균 매출 (원)
     private Long averageSales;
 
-    // 포화 지수 (자체 계산 로직 결과값)
-    private Double saturationIndex;
+    private Double netGrowthRate; // 순성장률 (성장률 - 폐업률)
 
     // 시장 등급 (RED, YELLOW, GREEN)
     @Enumerated(EnumType.STRING)

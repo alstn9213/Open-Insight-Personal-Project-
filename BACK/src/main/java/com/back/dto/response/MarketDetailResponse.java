@@ -11,6 +11,7 @@ public record MarketDetailResponse(
         int storeCount,         // 점포 수
         double growthRate,      // 성장률
         double closingRate,     // 폐업률
+        double netGrowthRate,   // 순 성장률
         MarketGrade marketGrade,// 등급 (RED, YELLOW, GREEN)
         String description,     // "추천 상권"
         String label            // "안전"
@@ -24,6 +25,7 @@ public record MarketDetailResponse(
                 stats.getStoreCount(),
                 stats.getGrowthRate(),
                 stats.getClosingRate(),
+                stats.getNetGrowthRate(),
                 stats.getMarketGrade(),
                 stats.getMarketGrade().getDescription(),
                 stats.getMarketGrade().getLabel()
