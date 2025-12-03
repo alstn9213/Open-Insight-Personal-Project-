@@ -2,7 +2,7 @@ import os
 import sys
 import random
 import time
-# import requests
+import requests
 import pandas as pd
 from dotenv import load_dotenv
 from sqlalchemy import text
