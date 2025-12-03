@@ -15,6 +15,6 @@ public record MarketAnalysisRequest(
     public record WeightOption(
             double salesWeight,    // 매출 비중
             double stabilityWeight, // 안정성(폐업률) 비중
-            double costWeight      // 초기비용 비중
+            double growthWeight      // 성장률 비중
     ) {}
 }

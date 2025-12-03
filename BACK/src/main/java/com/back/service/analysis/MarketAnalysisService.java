@@ -85,7 +85,7 @@ public class MarketAnalysisService {
 
         double score = (salesScore * weights.salesWeight())
                 - (stats.getClosingRate() * weights.stabilityWeight() * 100) // 폐업률 비중 증폭
-                + (stats.getGrowthRate() * 10); // 성장률 가산점
+                + (stats.getGrowthRate() * weights.growthWeight());
 
         return Math.max(score, 0.0); // 점수가 음수가 나오지 않도록 보정
     }
