@@ -13,7 +13,7 @@ sys.path.append(project_root)
 
 from src.config.database import db_connection
 
-load_dotenv()
+load_dotenv() # 호출하면 전역변수에 자동으로 .env 설정을 등록
 API_KEY = os.getenv("PUBLIC_DATA_API_KEY")
 API_URL = os.getenv("PUBLIC_DATA_API_URL")
 
@@ -51,16 +51,20 @@ def fetch_store_data():
       return
     
     market_data_list = []
+    ids_to_delete = []
+    
     total_steps = len(regions_df) * len(categories_df)
     current_step = 0
     
     for _, region in regions_df.iterrows():
       for _, category in categories_df.iterrows():
-        current_step += 1
-        if (region['region_id'], category['category_id']) in existing_pairs: # 이미 DB에 있으면 스킵
-          print(f"[{current_step}/{total_steps}] [Skip] {region['district']} - {category['name']} (이미 존재함)")
-          continue
         
+        current_step += 1
+        
+        if (region['region_id'], category['category_id']) in existing_pairs: # 이미 DB에 있으면 스킵
+          print(f"[{current_step}/{total_steps}] [Update] {region['district']} - {category['name']} (기존 데이터 덮어쓰기)")
+          ids_to_delete.append((region['region_id'], category['category_id']))
+                  
         target_code = CATEGORY_CODES.get(category['name'])
         if not target_code:
           print(f"{category['name']}에 대한 매핑 코드가 없습니다. 건너뜁니다.")
@@ -74,27 +78,38 @@ def fetch_store_data():
                   "serviceKey": API_KEY,
                   "pageNo": 1,
                   "numOfRows": 1,         # 개수만 알면 되므로 1개만 요청 (body의 totalCount 활용)
-                  "divId": "signguCd",    # 구 단위 조회 (법정동 단위면 'adongCd')
+                  "divId": "adongCd",    # 동 단위
                   "key": region['adm_code'],
-                  "indsSclsCd": target_code, # 업종별 소분류
+                  # "indsSclsCd": target_code, # 업종별 소분류
                   "type": "json"
                 }
         
         try:
-          if API_URL:
-            response = requests.get(API_URL, params=params, timeout=3)
-          if response.status_code == 200:
-            data = response.json()
-            if 'body' in data and 'totalCount' in data['body']:
-              real_store_count = int(data['body']['totalCount'])
-              print(f"   -> API 조회 성공: {real_store_count}개 점포")
+            if API_URL:
+              response = requests.get(API_URL, params=params, timeout=10)
+              
+              # [디버깅 코드 추가] 실제 응답이 어떻게 오는지 확인
+              print(f"응답 상태 코드: {response.status_code}")
+              # 응답의 앞부분 500자만 출력해서 확인 (HTML인지 JSON인지 구별 가능)
+              print(f"응답 내용 미리보기: {response.text[:500]}") 
+
+              if response.status_code == 200:
+                  # 여기서 response.text가 "<OpenAPI_ServiceResponse..." 같은 XML이거나
+                  # "<!DOCTYPE html>..." 이면 JSON 파싱에서 에러가 납니다.
+                  data = response.json()
+                  if 'body' in data and 'totalCount' in data['body']:
+                    real_store_count = int(data['body']['totalCount'])
+                    print(f"   -> API 조회 성공: {real_store_count}개 점포")
+                  else:
+                      # JSON은 왔지만 구조가 다른 경우 확인
+                      print(f"   -> API 응답 구조가 예상과 다름: {data.keys()}")
         except Exception as e:
           print(f"    -> API 오류: {e}")
           
         # API 실패 또는 결과가 0일 경우 시뮬레이션 데이터 사용
         if real_store_count == 0:
             real_store_count = random.randint(50, 500)
-            print(f"   -> (API 실패/0건) 더미 데이터 사용: {real_store_count}개")
+            print(f"   -> (API 실패) 더미 데이터 사용: {real_store_count}개")
             
         # ---------------------------------------------------------
         # 2. 파생 지표 생성 (폐업률 정보 API를 구하기 어려워 점포 수(store_count)와 연동하여 그럴듯한 데이터를 생성.)
@@ -138,7 +153,25 @@ def fetch_store_data():
           'updated_at': pd.Timestamp.now()
       })
         time.sleep(0.05)
-        # for 문 종료
+    # for 문 종료 후, 데이터 적재 전 기존 데이터 삭제
+    if ids_to_delete:
+        try:
+            print(f"기존 데이터 {len(ids_to_delete)}건 삭제 중...")
+            with db_connection.connect() as conn:
+                with conn.begin(): # 트랜잭션 시작
+                    for rid, cid in ids_to_delete:
+                        # 오늘 날짜의 해당 지역/업종 데이터 삭제
+                        delete_query = text("""
+                            DELETE FROM market_stats 
+                            WHERE region_id = :rid 
+                              AND category_id = :cid 
+                              AND DATE(created_at) = :today
+                        """)
+                        conn.execute(delete_query, {'rid': rid, 'cid': cid, 'today': today_str})
+            print("기존 데이터 삭제 완료.")
+        except Exception as e:
+            print(f"삭제 중 오류 발생: {e}")
+            
     if market_data_list:
       df = pd.DataFrame(market_data_list)
       df.to_sql(name='market_stats', con=db_connection, if_exists='append', index=False)
