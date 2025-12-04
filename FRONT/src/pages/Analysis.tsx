@@ -1,6 +1,7 @@
 // src/pages/Analysis.tsx
 import { useState, useEffect } from "react";
 import AnalysisMap from "../components/map/AnalysisMap";
+import type { MarketMapData } from "../types/map";
 
 // 임시 GeoJSON 데이터 (테스트용 사각형 2개)
 // 실제 개발 시에는 public 폴더에 있는 .geojson 파일을 fetch로 불러와야 합니다.
@@ -32,9 +33,9 @@ const MOCK_GEOJSON = {
 };
 
 // 임시 백엔드 데이터 (MarketMapResponse 형태)
-const MOCK_MAP_DATA = [
-  { admCode: "1168051000", district: "강남구", marketGrade: "GREEN", storeCount: 500 },
-  { admCode: "1144066000", district: "마포구", marketGrade: "RED", storeCount: 200 },
+const MOCK_MAP_DATA: MarketMapData[] = [
+  { admCode: "1168051000", district: "강남구", marketGrade: "GREEN",storeCount: 500, netGrowthRate: 3.5 },
+  { admCode: "1144066000", district: "마포구", marketGrade: "RED", storeCount: 200, netGrowthRate: 3.5 },
 ];
 
 const Analysis = () => {

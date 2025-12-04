@@ -1,15 +1,16 @@
 import { Map, Polygon, useKakaoLoader } from "react-kakao-maps-sdk";
 import { useState } from "react";
+import type { MarketMapData, GeoJsonCollection } from "../../types/map";
 
 const GRADE_COLORS = {
   GREEN: { fill: "#00FF00", stroke: "#009900" },
   YELLOW: { fill: "#FFFF00", stroke: "#999900" },
   RED: { fill: "#FF0000", stroke: "#990000" },
-};
+} as const;
 
 interface AnalysisMapProps {
-  mapData: any[];
-  geoJson: any;
+  mapData: MarketMapData[];
+  geoJson: GeoJsonCollection | null;
   onSelectRegion: (admCode: string) => void;
 }
 
@@ -21,18 +22,17 @@ const AnalysisMap = ({ mapData, geoJson, onSelectRegion }: AnalysisMapProps) => 
 
   const [center, setCenter] = useState({ lat: 37.566826, lng: 126.9786567 });
 
-  const getPolygonPath = (coordinates: any[]) => {
-    return coordinates[0].map((coord: number[]) => ({
+  const getPolygonPath = (coordinates: number[][][]) => {
+    return coordinates[0].map((coord) => ({
       lng: coord[0],
       lat: coord[1],
     }));
   };
 
-  const getRegionInfo = (admCode: string) => {
+  const getRegionInfo = (admCode: string): MarketMapData | undefined => {
     return mapData.find((data) => data.admCode === admCode);
   };
 
-  // ★ 2. 로딩 상태 처리
   if (loading) return <div className="flex justify-center items-center h-full">지도를 불러오는 중...</div>;
   if (error) return <div className="text-red-500">지도를 불러오는데 실패했습니다.</div>;
 
@@ -43,12 +43,13 @@ const AnalysisMap = ({ mapData, geoJson, onSelectRegion }: AnalysisMapProps) => 
       level={8}
     >
       {geoJson &&
-        geoJson.features.map((feature: any, index: number) => {
+        geoJson.features.map((feature, index) => {
           const admCode = feature.properties.adm_code;
           const regionInfo = getRegionInfo(admCode);
           
-          const color = regionInfo
-            ? GRADE_COLORS[regionInfo.marketGrade as keyof typeof GRADE_COLORS]
+          const grade = regionInfo?.marketGrade;
+          const color = grade && GRADE_COLORS[grade]
+            ? GRADE_COLORS[grade]
             : { fill: "#CCCCCC", stroke: "#999999" };
 
           return (
