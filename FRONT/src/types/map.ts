@@ -14,8 +14,8 @@ export interface GeoJsonFeature {
     adm_code: string; // GeoJSON 파일의 속성명에 맞춤
   };
   geometry: {
-    type: string;
-    coordinates: number[][][]; // 3차원 배열 (Polygon 좌표)
+    type: "Polygon" | "MultiPolygon";
+    coordinates: any[]; // Polygon은 3중 배열, MultiPolygon은 4중 배열
   };
 }
 
