@@ -4,7 +4,6 @@ import Header from './components/layout/Header';
 import Home from './pages/Home';
 import Analysis from './pages/Analysis';
 import Ranking from './pages/Ranking';
-import Guide from './pages/Guide';
 
 function App() {
   return (
@@ -17,7 +16,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/analysis" element={<Analysis />} />
             <Route path="/ranking" element={<Ranking />} />
-            <Route path="/guide" element={<Guide />} />
           </Routes>
         </main>
       </div>
