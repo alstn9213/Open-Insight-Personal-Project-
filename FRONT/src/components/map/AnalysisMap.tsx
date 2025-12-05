@@ -46,14 +46,14 @@ const AnalysisMap = ({
     }));
   };
 
-  if (loading)
+  if(loading)
     return (
       <div className="flex justify-center items-center h-full text-gray-500">
         <span className="loading loading-spinner loading-md"></span>
         <span className="ml-2">지도를 불러오는 중...</span>
       </div>
     );
-  if (error)
+  if(error)
     return (
       <div className="text-red-500 font-bold p-4">
         지도를 불러오는데 실패했습니다. API 키를 확인해주세요.
@@ -68,8 +68,8 @@ const AnalysisMap = ({
     >
       {geoJson &&
         geoJson.features.map((feature, index) => {
-          const { adm_code } = feature.properties;
-          const shortAdmCode = adm_code.substring(0, 8);
+          const { adm_cd } = feature.properties;
+          const shortAdmCode = adm_cd.substring(0, 8);
 
           // 색상 결정 및 데이터 매핑
           const regionInfo = mapDataMap.get(shortAdmCode);
@@ -112,7 +112,7 @@ const AnalysisMap = ({
                   strokeWeight: 1,
                 })
               }
-              onClick={() => onSelectRegion(adm_code)}
+              onClick={() => onSelectRegion(adm_cd)}
             />
           ));
         })}
