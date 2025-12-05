@@ -4,9 +4,8 @@ import AnalysisMap from "../components/map/AnalysisMap";
 import type { GeoJsonCollection, MarketMapData } from "../types/map";
 import type { MarketDetailResponse } from "../types/market";
 // import axiosClient from "../api/axiosClient";
-import GrowthChart from "../components/chart/GrowthChart";
-import SalesChart from "../components/chart/SalesChart";
 import GradeBadge from "../components/chart/ScoreChart";
+import AnalysisChart from "../components/chart/AnalysisChart";
 
 
 const MOCK_MAP_DATA: MarketMapData[] = [
@@ -135,19 +134,8 @@ const Analysis = () => {
               </div>
 
               {/* 4. 차트 영역 */}
-              <div className="card bg-base-100 shadow-sm border border-gray-100 p-2">
-                <SalesChart
-                  averageSales={marketDetail.averageSales} 
-                  storeCount={marketDetail.storeCount} 
-                />
-              </div>
-
-              <div className="card bg-base-100 shadow-sm border border-gray-100 p-2">
-                <GrowthChart
-                  growthRate={marketDetail.growthRate} 
-                  closingRate={marketDetail.closingRate}
-                  netGrowthRate={marketDetail.netGrowthRate}
-                />
+              <div className="mt-6">
+                <AnalysisChart data={marketDetail} loading={loading} />
               </div>
 
               {/* 5. 한줄 평 */}
