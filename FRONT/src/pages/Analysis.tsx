@@ -2,74 +2,174 @@
 import { useState, useEffect } from "react";
 import AnalysisMap from "../components/map/AnalysisMap";
 import type { GeoJsonCollection, MarketMapData } from "../types/map";
+import type { MarketDetailResponse } from "../types/market";
+// import axiosClient from "../api/axiosClient";
+import GrowthChart from "../components/chart/GrowthChart";
+import SalesChart from "../components/chart/SalesChart";
+import GradeBadge from "../components/chart/ScoreChart";
 
-// 임시 백엔드 데이터 (MarketMapResponse 형태)
+
 const MOCK_MAP_DATA: MarketMapData[] = [
-  { admCode: "1168051000", district: "강남구", marketGrade: "GREEN",storeCount: 500, netGrowthRate: 3.5 },
-  { admCode: "1144066000", district: "마포구", marketGrade: "RED", storeCount: 200, netGrowthRate: 3.5 },
+  { admCode: "11680510", district: "강남구", marketGrade: "GREEN", storeCount: 520, netGrowthRate: 3.5 },
+  { admCode: "11440660", district: "마포구", marketGrade: "RED", storeCount: 310, netGrowthRate: -1.2 },
+  { admCode: "11110515", district: "종로구", marketGrade: "YELLOW", storeCount: 150, netGrowthRate: 0.5 },
 ];
 
+// 상세 분석 패널에 표시할 더미 데이터 (클릭 시 나오는 정보)
+const MOCK_DETAIL_DATA: MarketDetailResponse = {
+  statsId: 101,
+  regionName: "서울특별시 강남구 신사동",
+  categoryName: "카페",
+  averageSales: 45000000, // 4,500만 원
+  storeCount: 120,
+  growthRate: 5.2,
+  closingRate: 2.1,
+  netGrowthRate: 3.1,
+  marketGrade: "GREEN",
+  description: "유동인구가 많고 매출이 안정적인 추천 상권입니다.",
+  label: "안전"
+};
 const Analysis = () => {
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
+  const [selectedRegionCode, setSelectedRegionCode] = useState<string | null>(null);
   const [geoJson, setGeoJson] = useState<GeoJsonCollection | null>(null);
+  const [marketDetail, setMarketDetail] = useState<MarketDetailResponse | null>(
+    null
+  );
+  const [loading, setLoading] = useState(false);
 
+  // GeoJson 로드
   useEffect(() => {
     const fetchGeoJson = async () => {
       try {
-        const response = await fetch("/assets/geojson/Local_HangJeongDong-master/hangjeongdong_서울특별시.geojson");
-        if(!response.ok) {
+        const response = await fetch(
+          "/assets/geojson/Local_HangJeongDong-master/hangjeongdong_서울특별시.geojson"
+        );
+        if (!response.ok) {
           throw new Error("GeoJSON 파일을 불러오는데 실패했습니다.");
         }
         const data = await response.json();
         setGeoJson(data);
-      } catch(error) {
-        console.error("GeoJSON Load Error:", error)
+      } catch (error) {
+        console.error("GeoJSON Load Error:", error);
       }
     };
     fetchGeoJson();
   }, []);
 
-  const handleSelectRegion = (admCode: string) => {
-    console.log("선택된 지역 코드:", admCode);
-    setSelectedRegion(admCode);
-    // TODO: 여기서 상세 분석 API 호출
+  const handleSelectRegion = async (admCode: string) => {
+    const shortAdmCode = admCode.substring(0, 8);
+    setSelectedRegionCode(shortAdmCode);
+    setLoading(true);
+
+    setTimeout(()=>{
+      setMarketDetail({
+        ...MOCK_DETAIL_DATA,
+        regionName: `서울 특별시 구역 (${shortAdmCode})`,
+      });
+      setLoading(false);
+    }, 500);
+    // try {
+    //   const categoryId = 1;
+    //   const response  = await axiosClient.get<MarketDetailResponse>("/market/analysis", {
+    //     params: {admCode: shortAdmCode, categoryId}
+    //   });
+    //   setMarketDetail(response.data);
+    // } catch(error) {
+    //   console.error("상세 분석 데이터 로드 실패: ", error);
+    //   setMarketDetail(null);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   return (
-      <div className="flex flex-col h-screen p-4 gap-4">
-        <h1 className="text-2xl font-bold text-gray-800">🗺️ 상권 지도 분석</h1>
-        
-        <div className="flex flex-1 gap-4">
-          {/* 지도 영역 */}
-          <div className="w-2/3 h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative">
-            <AnalysisMap 
-              mapData={MOCK_MAP_DATA} 
-              geoJson={geoJson} 
-              onSelectRegion={handleSelectRegion} 
-            />
-          </div>
+    <div className="flex flex-col h-screen p-4 gap-4 bg-gray-50">
+      <h1 className="text-2xl font-bold text-gray-800">🗺️ 상권 지도 분석</h1>
 
-          {/* 상세 정보 패널 */}
-          <div className="w-1/3 h-full bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">상세 정보</h2>
-            {selectedRegion ? (
-              <div className="space-y-4">
-                <div className="alert alert-info">
-                  <span>선택된 지역 코드: <strong>{selectedRegion}</strong></span>
+      <div className="flex flex-1 gap-4 overflow-hidden">
+        {/* 왼쪽: 지도 영역 */}
+        <div className="w-2/3 h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative bg-white">
+          <AnalysisMap
+            mapData={MOCK_MAP_DATA} // 추후 API(/market/map-info) 데이터로 교체 필요
+            geoJson={geoJson}
+            onSelectRegion={handleSelectRegion}
+          />
+        </div>
+
+        {/* 오른쪽: 상세 정보 패널 */}
+        <div className="w-1/3 h-full bg-white p-6 rounded-xl shadow-lg border border-gray-200 overflow-y-auto">
+          <h2 className="text-xl font-semibold mb-4 border-b pb-2">
+            상세 분석 리포트
+          </h2>
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <span className="loading loading-spinner loading-lg text-primary"></span>
+            </div>
+          ) : marketDetail ? (
+            <div className="space-y-6 animate-fade-in">
+              
+              {/* 1. 지역 및 업종 정보 */}
+              <div className="text-center mb-4">
+                <h3 className="text-2xl font-bold text-gray-800">{marketDetail.regionName}</h3>
+                <p className="text-gray-500 font-medium">{marketDetail.categoryName} 분석 결과</p>
+              </div>
+
+              {/* 2. 종합 등급 배지 */}
+              <GradeBadge grade={marketDetail.marketGrade} />
+
+              {/* 3. 핵심 요약 카드 */}
+              <div className="stats shadow w-full">
+                <div className="stat place-items-center">
+                  <div className="stat-title">월 평균 매출</div>
+                  <div className="stat-value text-primary text-2xl">
+                    {marketDetail.averageSales.toLocaleString()}원
+                  </div>
                 </div>
-                <p className="text-gray-600">
-                  분석 데이터가 여기에 표시됩니다.
-                </p>
+                <div className="stat place-items-center">
+                  <div className="stat-title">순성장률</div>
+                  <div className={`stat-value text-2xl ${marketDetail.netGrowthRate >= 0 ? 'text-success' : 'text-error'}`}>
+                    {marketDetail.netGrowthRate}%
+                  </div>
+                </div>
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-                <p>지도에서 분석하고 싶은 구역을 클릭하세요.</p>
+
+              {/* 4. 차트 영역 */}
+              <div className="card bg-base-100 shadow-sm border border-gray-100 p-2">
+                <SalesChart
+                  averageSales={marketDetail.averageSales} 
+                  storeCount={marketDetail.storeCount} 
+                />
               </div>
-            )}
-          </div>
+
+              <div className="card bg-base-100 shadow-sm border border-gray-100 p-2">
+                <GrowthChart
+                  growthRate={marketDetail.growthRate} 
+                  closingRate={marketDetail.closingRate}
+                  netGrowthRate={marketDetail.netGrowthRate}
+                />
+              </div>
+
+              {/* 5. 한줄 평 */}
+              <div className="alert alert-info shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div>
+                  <h3 className="font-bold">분석 결과 요약</h3>
+                  <div className="text-xs">{marketDetail.description}</div>
+                </div>
+              </div>
+
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-64 text-gray-400">
+              <span className="text-4xl mb-2">👆</span>
+              <p>지도에서 지역을 클릭하면<br/>상세 분석 결과가 표시됩니다.</p>
+            </div>
+          )}
         </div>
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 export default Analysis;

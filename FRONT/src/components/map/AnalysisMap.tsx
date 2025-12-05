@@ -38,7 +38,7 @@ const AnalysisMap = ({
     return map;
   }, [mapData]);
 
-  // 좌표 변환 함수 (GeoJSON [lng, lat] -> Kakao {lat, lng})
+  // 좌표 변환 함수 (GeoJSON 경도 위도를 Kakao 경도 위도로)
   const getPathFromRing = (ring: number[][]) => {
     return ring.map((coord) => ({
       lng: coord[0],
