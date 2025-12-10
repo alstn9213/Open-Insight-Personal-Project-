@@ -7,6 +7,7 @@ import com.back.domain.market.dto.response.MarketMapResponse;
 import com.back.domain.market.dto.response.StartupRankingResponse;
 import com.back.domain.market.repository.MarketStatsRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +30,8 @@ public class MarketAnalysisService {
         return MarketDetailResponse.from(stats);
     }
 
+    // 상권 상세 분석 (Key: admCode + categoryId 조합)
+    @Cacheable(value = "marketAnalysis", key = "#admCode + '_' + #categoryId")
     public MarketDetailResponse getAnalysis(String admCode, Long categoryId) {
         MarketStats stats = marketStatsRepository.findByAdmCodeAndCategoryId(admCode,categoryId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 지역 및 업종에 대한 분석 데이터가 없습니다."));
@@ -82,9 +85,11 @@ public class MarketAnalysisService {
     }
 
     /**
-     * 지도 시각화용 데이터 조회 (Map Overlay)
+     * 지도 시각화용 데이터 조회 (Key: province + categoryId)
      * 특정 광역자치단체(province) 내의 모든 구/군별 통계 데이터를 반환합니다.
+     * 데이터 양이 많아(List) DB 부하가 큰 작업이므로 캐싱 효과가 큼
      */
+    @Cacheable(value = "marketMap", key = "#province + '_' + #categoryId")
     public List<MarketMapResponse> getMapInfo(String province, Long categoryId) {
         List<MarketStats> statsList = marketStatsRepository.findAllByProvinceAndCategoryId(province, categoryId);
 
