@@ -11,5 +11,4 @@ export interface MarketDetailResponse {
   netGrowthRate: number;
   marketGrade: MarketGrade;
   description: string;
-  label: string;
 }

@@ -1,7 +1,8 @@
 package com.back.domain.market.service.analysis;
 
-import com.back.domain.market.entity.MarketStats;
 import com.back.domain.market.dto.request.MarketAnalysisRequest;
+import com.back.domain.market.dto.request.MarketAnalysisRequest.WeightOption;
+import com.back.domain.market.entity.MarketStats;
 import com.back.domain.market.dto.response.MarketDetailResponse;
 import com.back.domain.market.dto.response.MarketMapResponse;
 import com.back.domain.market.dto.response.StartupRankingResponse;
@@ -23,14 +24,7 @@ public class MarketAnalysisService {
 
     private final MarketStatsRepository marketStatsRepository;
 
-    // 상권 상세 분석 (신호등 데이터)
-    public MarketDetailResponse getMarketDetail(String admCode, Long categoryId) {
-        MarketStats stats = marketStatsRepository.findByAdmCodeAndCategoryId(admCode, categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 지역/업종의 데이터가 없습니다."));
-        return MarketDetailResponse.from(stats);
-    }
-
-    // 상권 상세 분석 (Key: admCode + categoryId 조합)
+    // 상권 상세 분석
     @Cacheable(value = "marketAnalysis", key = "#admCode + '_' + #categoryId")
     public MarketDetailResponse getAnalysis(String admCode, Long categoryId) {
         MarketStats stats = marketStatsRepository.findByAdmCodeAndCategoryId(admCode,categoryId)
@@ -42,7 +36,7 @@ public class MarketAnalysisService {
     @Transactional(readOnly = true)
     public List<StartupRankingResponse> recommendStartups(MarketAnalysisRequest request) {
         List<MarketStats> allStats = marketStatsRepository.findAllByRegionAdmCode(request.admCode());
-        MarketAnalysisRequest.WeightOption weights = request.weightOption();
+        WeightOption weights = request.weightOption();
 
         return allStats.stream()
                 .map(stats -> {
