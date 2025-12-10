@@ -26,7 +26,6 @@ const MOCK_DETAIL_DATA: MarketDetailResponse = {
   netGrowthRate: 3.1,
   marketGrade: "GREEN",
   description: "유동인구가 많고 매출이 안정적인 추천 상권입니다.",
-  label: "안전"
 };
 const Analysis = () => {
   const [selectedRegionCode, setSelectedRegionCode] = useState<string | null>(null);
