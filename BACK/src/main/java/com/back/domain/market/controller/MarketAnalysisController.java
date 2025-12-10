@@ -23,8 +23,8 @@ public class MarketAnalysisController {
     @GetMapping("/analysis")
     public ResponseEntity<MarketDetailResponse> getMarketAnalysis(
             @RequestParam("admCode") String admCode,
-            @RequestParam("categoryId") Long categoryId) {
-
+            @RequestParam("categoryId") Long categoryId
+    ) {
         MarketDetailResponse response = marketAnalysisService.getAnalysis(admCode, categoryId);
         return ResponseEntity.ok(response);
     }
@@ -32,17 +32,17 @@ public class MarketAnalysisController {
     // 맞춤형 창업 순위 추천
     @PostMapping("/recommend")
     public ResponseEntity<List<StartupRankingResponse>> recommendStartup(
-            @Valid @RequestBody MarketAnalysisRequest request) {
+            @Valid @RequestBody MarketAnalysisRequest request
+    ) {
         List<StartupRankingResponse> rankings = marketAnalysisService.recommendStartups(request);
         return ResponseEntity.ok(rankings);
     }
 
-    // 지도 데이터 조회용 DTO (MarketMapResponse) 생성 필요
     @GetMapping("/map-info")
     public ResponseEntity<List<MarketMapResponse>> getMapInfo(
             @RequestParam("province") String province,
-            @RequestParam("categoryId") Long categoryId) {
-
+            @RequestParam("categoryId") Long categoryId
+    ) {
         List<MarketMapResponse> mapInfo = marketAnalysisService.getMapInfo(province, categoryId);
         return ResponseEntity.ok(mapInfo);
     }

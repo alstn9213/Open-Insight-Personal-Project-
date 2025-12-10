@@ -91,6 +91,6 @@ class MarketDataETL:
     except Exception as e:
       logger.error(f"ETL 프로세스 실행 중 치명적 오류 발생: {e}")
       
-if __name__ == "main":
+if __name__ == "__main__":
   etl_process = MarketDataETL()
   etl_process.run()

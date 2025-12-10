@@ -98,9 +98,8 @@ public class MarketAnalysisService {
                 .collect(Collectors.toList());
     }
 
-    /**
-    *[내부 메서드]
-    */
+   // --- 내부 메서드 ---
+
     private double calculateScore(MarketStats stats, MarketAnalysisRequest.WeightOption weights) {
         double salesScore = (stats.getAverageSales() / 10000.0);
 
@@ -110,10 +109,7 @@ public class MarketAnalysisService {
 
         return Math.max(score, 0.0); // 점수가 음수가 나오지 않도록 보정
     }
-    /**
-     * [내부 메서드] 뱃지 부여 로직
-     * 통계 수치의 특정 임계값을 넘으면 뱃지를 부여합니다.
-     */
+
     private String determineBadge(MarketStats stats, double totalScore) {
         // 기준값 설정 (실제 서비스에서는 전체 데이터의 평균/표준편차를 구해 동적으로 설정하는 것이 좋음), THRESHOLD (임계값, 기준값)
         double HIGH_SALES_THRESHOLD = 50000000; // 월 매출 5천만원 이상

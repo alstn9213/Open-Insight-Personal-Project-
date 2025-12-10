@@ -13,8 +13,7 @@ public record MarketDetailResponse(
         double closingRate,     // 폐업률
         double netGrowthRate,   // 순 성장률
         MarketGrade marketGrade,// 등급 (RED, YELLOW, GREEN)
-        String description,     // "추천 상권"
-        String label            // "안전"
+        String description     // "추천 상권"
 ) {
     public static MarketDetailResponse from(MarketStats stats) {
         return new MarketDetailResponse(
@@ -27,8 +26,7 @@ public record MarketDetailResponse(
                 stats.getClosingRate(),
                 stats.getNetGrowthRate(),
                 stats.getMarketGrade(),
-                stats.getMarketGrade().getDescription(),
-                stats.getMarketGrade().getLabel()
+                stats.getMarketGrade().getDescription()
         );
     }
 
