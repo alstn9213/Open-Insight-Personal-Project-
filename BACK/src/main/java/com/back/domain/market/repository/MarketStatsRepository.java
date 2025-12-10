@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface MarketStatsRepository extends JpaRepository<MarketStats, Long> {
+public interface MarketStatsRepository extends JpaRepository<MarketStats, Long>, MarketStatsRepositoryCustom {
     // 1. 특정 지역(admCode)과 업종(categoryId)으로 상권 통계 상세 조회
     // N+1 문제를 방지하기 위해 Region과 Category를 Fetch Join으로 한 번에 가져옵니다.
     @Query("SELECT m FROM MarketStats m " +
