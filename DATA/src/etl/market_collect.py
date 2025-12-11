@@ -4,6 +4,7 @@ import time
 import logging
 from datetime import datetime
 from dotenv import load_dotenv
+from src.utils.file_loader import load_category_map
 
 # 프로젝트 루트 경로를 path에 추가 (모듈 import를 위해)
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -23,6 +24,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 load_dotenv()
+
+CATEGORY_CODES = load_category_map()
 
 class MarketDataETL:
 
@@ -54,8 +57,13 @@ class MarketDataETL:
         store_count = self.api_client.fetch_store_count(adm_code)
 
         for _, category in categories_df.iterrows():
-     
+          
+          cat_name = category["name"]
+          cat_code = CATEGORY_CODES.get(cat_name)
+          store_count = self.api_client.fetch_store_count(adm_code, cat_code)
+          metrics = self.calculator.calculate(store_count, ...)
           current_key = (region["region_id"], category["category_id"])
+          
           if current_key in existing_keys:
             ids_to_delete.append(current_key)
 
