@@ -9,42 +9,50 @@ from src.config.constants import (
 logger = logging.getLogger(__name__)
 
 class MarketMetricsCalculator:
-  """
-  상권 데이터의 파생 지표(매출, 성장률, 등급 등)를 계산하는 클래스입니다.
-  순수 비즈니스 로직만 포함하며, DB나 외부 API에 의존하지 않습니다.
-  """
-  def calculate(self, store_count: int) -> dict:
-    """
-    점포 수를 기반으로 각종 상권 지표를 계산하여 반환합니다.
-    """
-    final_store_count = store_count
+ 
+  def calculate(self, store_count: int, floating_pop: int, category_name: str) -> dict:
+  
+    # 점포 수 보정 (0이면 최소값 부여)
+    final_store_count = store_count if store_count > 0 else random.randint(10, 50)
     is_simulated = False
     
-    if final_store_count <= 0:
-      final_store_count = random.randint(50, 500)
+    if store_count <= 0:
       is_simulated = True
-      logger.debug(f"데이터 없음. 시뮬레이션 값 사용: {final_store_count}")
+      logger.debug(f"점포 데이터 없음. 시뮬레이션 값 사용: {final_store_count}")
     
-    # 점포 수가 많을수록 경쟁으로 인해 평균 매출이 감소하는 경향을 반영
-    competition_factor = final_store_count / 1000.0
-    random_variation = random.uniform(SALES_VARIATION_MIN, SALES_VARIATION_MAX)
-    
+    # 업종별 유동인구 의존도 (가중치) 설정
+    # 카페/편의점은 지나가는 사람(유동인구) 수에 민감
+    # 미용실 등은 목적형 방문이라 덜 민감함
+    if category_name in ["카페", "편의점"]:
+       pop_weight = 0.8
+    else:
+       pop_weight: 0.5
+
+    # 유효 수요 = 유동인구 * 업종 가중치
+    potential_customers = floating_pop / pop_weight 
+    # 점포당 파이(손님 수) = 전체 수요 / 경쟁 점포 수
+    customers_per_store = potential_customers / max(final_store_count, 1)
+
+    # 예상 매출
+    # 객단가 15,000원 가정 * 일일 손님 수 * 30일
+    # 여기에 약간의 랜덤 변동성(0.8 ~ 1.2배)을 줌
+    base_sales = customers_per_store * 15000 * 30
+    random_variation = random.uniform(0.8, 1.2)  
+    # 너무 낮은 매출 방지 (최소 100만원 보장)
     average_sales = int(
-      (BASE_SALES * random_variation) - (competition_factor * 5_000_000)
+      max((base_sales * random_variation), 1_000_000)
     )
-    
-    growth_rate = round(random.uniform(GROWTH_RATE_MIN, GROWTH_RATE_MAX), 2)
-    
-    # 폐업률 (Closing Rate) 생성
-    # 매출이 기준(4천만원)보다 낮으면 폐업 위험도를 높게(가중치) 설정
-    risk_factor = 1.0
-    if average_sales <= HIGH_SALES_THRESHOLD:
-      risk_factor = HIGH_RISK_FACTOR
-      
-    closing_rate = round(
-      round.uniform(CLOSING_RATE_MIN, CLOSING_RATE_MAX) * risk_factor, 2
-    )
-    
+
+    if average_sales > 50_000_000:
+       growth_rate = round(random.uniform(3.0, 10.0), 2)
+       closing_rate = round(random.uniform(0.0, 1.5), 2)
+    elif average_sales > 20_000_000:
+      growth_rate = round(random.uniform(-1.0, 5.0), 2)
+      closing_rate = round(random.uniform(1.0, 3.0), 2)
+    else: # 매출 저조 (위험)
+      growth_rate = round(random.uniform(-5.0, 1.0), 2)
+      closing_rate = round(random.uniform(3.0, 8.0), 2)
+
     net_growth_rate = round(growth_rate - closing_rate, 2)
     market_grade = self._determine_grade(net_growth_rate)
     
@@ -57,11 +65,9 @@ class MarketMetricsCalculator:
       "market_grade": market_grade,
       "is_simulated": is_simulated
     }
-    
-  def _determine_grade(self, net_growth_rate: float) -> str: # 내부 메서드는 메서드명 앞에 _을 붙인다.
-    """
-    순성장률에 따라 상권의 등급을 결정합니다. (내부 메서드)
-    """
+  
+  # 내부 메서드는 메서드명 앞에 _을 붙인다
+  def _determine_grade(self, net_growth_rate: float) -> str: 
     if net_growth_rate >= GRADE_GREEN_THRESHOLD:
         return "GREEN"   # 성장/추천
     elif net_growth_rate <= GRADE_RED_THRESHOLD:

@@ -13,9 +13,7 @@ class MarketRepository:
     self.engine = db_engine
     
   def get_base_info(self):
-    """
-    수집 대상이 되는 기초 데이터(지역 정보, 업종 정보)를 DB에서 조회합니다.
-    """
+    
     try:
       with self.engine.connect() as conn:
         regions_df = pd.read_sql(
@@ -32,10 +30,7 @@ class MarketRepository:
       raise
     
   def get_existing_keys(self, target_date: str) -> set:
-    """
-    특정 날짜에 이미 적재된 데이터의 키(region_id, category_id)를 조회합니다.
-    중복 수집을 방지하기 위함입니다.
-    """
+   
     query = text("""
         SELECT region_id, category_id
         FROM market_stats
@@ -51,18 +46,18 @@ class MarketRepository:
       return set()
   
   def delete_market_stats(self, id_pairs: list, target_date: str):
-    """
-    특정 날짜의 특정 지역/업종 데이터를 삭제합니다. (재수집 시 기존 데이터 정리용)
-    """
+   
     if not id_pairs:
       return
 
-    delete_query = text("""
+    delete_query = text(
+      """
         DELETE FROM market_stats
         WHERE region_id = :rid
           AND category_id = :cid
           AND DATE(created_at) = :target_date
-    """)
+      """
+    )
     
     try:
     # 대량 삭제 시 트랜잭션 처리
@@ -79,9 +74,7 @@ class MarketRepository:
         raise
   
   def save_market_stats(self, data_list: list):
-    """
-    가공된 상권 분석 데이터를 DB에 적재(Insert)합니다.
-    """
+    
     if not data_list:
       logger.info("저장할 데이터가 없습니다.")
       return

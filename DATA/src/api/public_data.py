@@ -3,53 +3,53 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-"""
-공공데이터포털(Data.go.kr) API와 통신을 담당하는 클래스
-"""
 class PublicDataClient:
-  def __init__(self, api_key: str, api_url: str):
-    self.api_key = api_key
-    self.api_url = api_url
-    
-    if not self.api_key or not self.api_url:
-      logger.warning("API Key 또는 URL이 설정되지 않았습니다. API 호출이 실패할 수 있습니다.")
-      
-  def fetch_store_count(self, adm_code: str) -> int:
-    
-    params = {
-            "serviceKey": self.api_key,
-            "pageNo": 1,
-            "numOfRows": 1,        # 개수만 확인하면 되므로 1건만 요청
-            "divId": "adongCd",    # 행정동 단위 조회
-            "key": adm_code,       # 행정동 코드
-            "type": "json"
-        }
-    
-    try:
-      response = requests.get(self.api_url, params=params, timeout=10)
-      if response.status_code != 200:
-        logger.warning(f"API 호출 실패 (Status: {response.status_code}) - AdmCode: {adm_code}")
-        return 0
-      try:
-        data = response.json()
-        if "header" in data and data["header"]["resultCode"] != "00":
-          error_msg = data['header'].get('resultMsg', 'Unknown Error')
-          logger.warning(f"API 결과 에러: {error_msg} (Code: {adm_code})")
-          return 0
-        if "body" in data and "totalCount" in data["body"]:
-          total_count = int(data["body"]["totalCount"])
-          logger.info(f"API 조회 성공: {total_count}개 (Code: {adm_code})")
-          return total_count
-        else:
-          logger.debug(f"예상치 못한 응답 구조: {data.keys()}")
-          return 0
+  def __init__(self, public_api_key: str, public_api_url: str, seoul_api_key: str, seoul_api_url: str):
+    self.public_api_key = public_api_key
+    self.public_api_url = public_api_url
         
-      except ValueError:
-        logger.error(f"JSON 파싱 실패. 응답 내용 일부: {response.text[:100]}")
+    self.seoul_api_key = seoul_api_key
+    self.seoul_api_url = seoul_api_url
+
+  def fetch_store_count(self, adm_code: str) -> int:
+    params = {
+      "serviceKey": self.public_api_key,
+      "pageNo": 1,
+      "numOfRows": 1,
+      "divId": "adongCd",
+      "key": adm_code,
+      "type": "json"
+    }
+    try:
+      response = requests.get(self.public_api_url, params=params, timeout=10)
+      if response.status_code == 200:
+        data = response.json()
+        if "body" in data and "totalCount" in data["body"]:
+          return int(data["body"]["totalCount"])
         return 0
-    except requests.exceptions.Timeout:
-      logger.error(f"API 요청 시간 초과(Timeout) - AdmCode: {adm_code}")
+    except Exception as e:
+      logger.error(f"상가 정보 조회 실패: {e}")
       return 0
-    except requests.exceptions.RequestException as e:
-      logger.error(f"API 연결 중 치명적 오류 발생: {e}")
-      return 0
+    
+  def fetch_seoul_population(self) -> dict:
+    request_url = f"{self.seoul_api_url}/{self.seoul_api_key}/json/SPOP_LOCAL_RESD_DONG/1/1000/"
+    pop_map = {}
+    try:
+      response = requests.get(request_url, timeout=10)
+      data = response.json()
+
+      if "SPOP_LOCAL_RESD_DONG" in data:
+        rows = data["SPOP_LOCAL_RESD_DONG"]["row"]
+        for row in rows:
+          code = str(row["ADSTRD_CODE_SE"]) # ADSTRD_CODE_SE: 행정동코드
+          pop = float(row["TOT_LVPOP_CO"]) # TOT_LVPOP_CO: 총생활인구수
+          pop_map[code] = int(pop)
+        logger.info(f"서울 생활 인구 데이터 {len(pop_map)}개 로드 완료")
+      else:
+        logger.warning("서울 생활인구 데이터 응답 형식이 올바르지 않습니다.")
+
+    except Exception as e:
+      logger.error(f"서울 생활 인구 API 호출 에러: {e}")
+
+    return pop_map
+        
