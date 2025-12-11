@@ -4,6 +4,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class PublicDataClient:
+
   def __init__(self, public_api_key: str, public_api_url: str, seoul_api_key: str, seoul_api_url: str):
     self.public_api_key = public_api_key
     self.public_api_url = public_api_url
@@ -26,7 +27,9 @@ class PublicDataClient:
         data = response.json()
         if "body" in data and "totalCount" in data["body"]:
           return int(data["body"]["totalCount"])
-        return 0
+      logger.warning(f"API 호출 실패 또는 데이터 없음 (Code: {response.status_code})")
+      return 0
+    
     except Exception as e:
       logger.error(f"상가 정보 조회 실패: {e}")
       return 0

@@ -1,10 +1,6 @@
 import random
 import logging
-from src.config.constants import (
-  BASE_SALES, HIGH_SALES_THRESHOLD, SALES_VARIATION_MIN, SALES_VARIATION_MAX,
-  GROWTH_RATE_MIN, GROWTH_RATE_MAX, CLOSING_RATE_MIN, CLOSING_RATE_MAX,
-  HIGH_RISK_FACTOR, GRADE_GREEN_THRESHOLD, GRADE_RED_THRESHOLD
-)
+from src.config.constants import (GRADE_GREEN_THRESHOLD, GRADE_RED_THRESHOLD)
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +22,10 @@ class MarketMetricsCalculator:
     if category_name in ["카페", "편의점"]:
        pop_weight = 0.8
     else:
-       pop_weight: 0.5
+       pop_weight = 0.5
 
     # 유효 수요 = 유동인구 * 업종 가중치
-    potential_customers = floating_pop / pop_weight 
+    potential_customers = floating_pop * pop_weight 
     # 점포당 파이(손님 수) = 전체 수요 / 경쟁 점포 수
     customers_per_store = potential_customers / max(final_store_count, 1)
 
@@ -44,8 +40,8 @@ class MarketMetricsCalculator:
     )
 
     if average_sales > 50_000_000:
-       growth_rate = round(random.uniform(3.0, 10.0), 2)
-       closing_rate = round(random.uniform(0.0, 1.5), 2)
+      growth_rate = round(random.uniform(3.0, 10.0), 2)
+      closing_rate = round(random.uniform(0.0, 1.5), 2)
     elif average_sales > 20_000_000:
       growth_rate = round(random.uniform(-1.0, 5.0), 2)
       closing_rate = round(random.uniform(1.0, 3.0), 2)
