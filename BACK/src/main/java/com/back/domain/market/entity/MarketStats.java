@@ -30,6 +30,10 @@ public class MarketStats extends BaseTimeEntity {
     private Category category;
 
     private Integer storeCount; // 총 점포 수
+
+    @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
+    private Integer floatingPopulation; // 유동인구
+
     private Double growthRate; // 점포 증가율 (%)
     private Double closingRate; // 폐업률 (%)
     private Long averageSales; // 평균 매출 (원)

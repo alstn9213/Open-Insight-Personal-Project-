@@ -22,16 +22,16 @@
   },
   {
     "rank": 4,
-    "regionName": "부산광역시 해운대구",
+    "regionName": "서울특별시 관악구",
     "categoryName": "미용실",
-    "totalScore": 81.0,
-    "badge": "인기 급상승"
+    "totalScore": 82.1,
+    "badge": null
   },
   {
     "rank": 5,
-    "regionName": "경기도 성남시",
+    "regionName": "서울특별시 은평구",
     "categoryName": "치킨",
-    "totalScore": 78.9,
+    "totalScore": 79.5,
     "badge": null
   }
 ]

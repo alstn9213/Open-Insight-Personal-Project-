@@ -6,12 +6,13 @@ import com.back.domain.market.entity.MarketGrade;
 public record MarketDetailResponse(
         Long statsId,
         String regionName,      // "서울특별시 강남구" (Region 엔티티 결합)
-        String categoryName,    // "카페"
-        long averageSales,      // 평균 매출
-        int storeCount,         // 점포 수
-        double growthRate,      // 성장률
-        double closingRate,     // 폐업률
-        double netGrowthRate,   // 순 성장률
+        String categoryName,
+        long averageSales,
+        int storeCount,
+        int floatingPopulation,
+        double growthRate,
+        double closingRate,
+        double netGrowthRate,
         MarketGrade marketGrade,// 등급 (RED, YELLOW, GREEN)
         String description     // "추천 상권"
 ) {
@@ -22,6 +23,7 @@ public record MarketDetailResponse(
                 stats.getCategory().getName(),
                 stats.getAverageSales(),
                 stats.getStoreCount(),
+                stats.getFloatingPopulation() != null ? stats.getFloatingPopulation() : 0,
                 stats.getGrowthRate(),
                 stats.getClosingRate(),
                 stats.getNetGrowthRate(),

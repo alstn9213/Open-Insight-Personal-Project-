@@ -41,7 +41,7 @@ public class MarketAnalysisService {
         return allStats.stream()
                 .map(stats -> {
                     double totalScore = calculateScore(stats, weights);
-                    String badge = determineBadge(stats, totalScore);
+                    String badge = determineBadge(stats);
 
                     return new StartupRankingResponse(
                             0, // 순위는 나중에 정렬 후 매김
@@ -97,31 +97,31 @@ public class MarketAnalysisService {
     private double calculateScore(MarketStats stats, MarketAnalysisRequest.WeightOption weights) {
         double salesScore = (stats.getAverageSales() / 10000.0);
 
+        // 유동인구가 많으면 가산점(1000명당 1점)
+        double populationBonus = (stats.getFloatingPopulation() != null)
+                ? (stats.getFloatingPopulation() / 1000.0) * 0.1
+                : 0.0;
+
         double score = (salesScore * weights.salesWeight())
                 - (stats.getClosingRate() * weights.stabilityWeight() * 100) // 폐업률 비중 증폭
-                + (stats.getGrowthRate() * weights.growthWeight());
+                + (stats.getGrowthRate() * weights.growthWeight())
+                + populationBonus;
 
         return Math.max(score, 0.0); // 점수가 음수가 나오지 않도록 보정
     }
 
-    private String determineBadge(MarketStats stats, double totalScore) {
-        // 기준값 설정 (실제 서비스에서는 전체 데이터의 평균/표준편차를 구해 동적으로 설정하는 것이 좋음), THRESHOLD (임계값, 기준값)
+    private String determineBadge(MarketStats stats) {
+        // 기준값 설정 (실제 서비스에서는 전체 데이터의 평균/표준편차를 구해 동적으로 설정하는 것이 좋음)
+        // THRESHOLD: 임계값, 기준값
         double HIGH_SALES_THRESHOLD = 50000000; // 월 매출 5천만원 이상
         double LOW_CLOSING_RATE_THRESHOLD = 2.0; // 폐업률 2% 미만
-        double HIGH_GROWKp_RATE_THRESHOLD = 5.0; // 성장률 5% 이상
+        double HIGH_GROWTH_RATE_THRESHOLD = 5.0; // 성장률 5% 이상
+        int HOT_PLACE_POPULATION = 50000;
 
-        if (stats.getAverageSales() >= HIGH_SALES_THRESHOLD) {
-            return "수익성 BEST";
-        }
-
-        if (stats.getClosingRate() <= LOW_CLOSING_RATE_THRESHOLD) {
-            return "안전성 BEST";
-        }
-
-        if (stats.getGrowthRate() >= HIGH_GROWKp_RATE_THRESHOLD) {
-            return "뜨는 상권";
-        }
-        // 특별한 강점이 없으면 null 반환 (프론트에서 렌더링 안 함)
+        if (stats.getFloatingPopulation() != null && stats.getFloatingPopulation() >= HOT_PLACE_POPULATION) return "핫플레이스";
+        if (stats.getAverageSales() >= HIGH_SALES_THRESHOLD) return "수익성 BEST";
+        if (stats.getClosingRate() <= LOW_CLOSING_RATE_THRESHOLD) return "안전성 BEST";
+        if (stats.getGrowthRate() >= HIGH_GROWTH_RATE_THRESHOLD) return "뜨는 상권";
         return null;
     }
 }
