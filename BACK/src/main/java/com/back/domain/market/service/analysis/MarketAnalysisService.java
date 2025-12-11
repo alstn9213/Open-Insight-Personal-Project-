@@ -16,6 +16,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -38,44 +39,27 @@ public class MarketAnalysisService {
         List<MarketStats> allStats = marketStatsRepository.findAllByRegionAdmCode(request.admCode());
         WeightOption weights = request.weightOption();
 
-        return allStats.stream()
-                .map(stats -> {
-                    double totalScore = calculateScore(stats, weights);
-                    String badge = determineBadge(stats);
+        List<MarketScoreResult> topRankedMarkets = allStats.stream()
+                .map(stats -> new MarketScoreResult(
+                        stats,
+                        calculateScore(stats, weights),
+                        determineBadge(stats)
+                ))
+                .sorted(Comparator.comparingDouble(MarketScoreResult::score).reversed())
+                .limit(10)
+                .toList();
 
-                    return new StartupRankingResponse(
-                            0, // 순위는 나중에 정렬 후 매김
-                            stats.getRegion().getProvince() + " " + stats.getRegion().getDistrict(),
-                            stats.getCategory().getName(),
-                            Math.round(totalScore * 10) / 10.0, // 소수점 첫째 자리까지 반올림
-                            badge
+        return IntStream.range(0, topRankedMarkets.size())
+                .mapToObj(index -> {
+                    MarketScoreResult result = topRankedMarkets.get(index);
+                    return StartupRankingResponse.of(
+                            index + 1,
+                            result.stats(),
+                            result.score(),
+                            result.badge()
                     );
                 })
-                .sorted(Comparator.comparingDouble(StartupRankingResponse::totalScore).reversed())
-                .limit(10) // 상위 10개
-                .map(response -> new StartupRankingResponse(
-                        // 랭킹 번호 매기기는 리스트 인덱스를 활용하거나 여기서 재매핑 필요하지만,
-                        // 스트림 특성상 외부 변수 제어가 까다로우므로 아래에서 리스트로 만든 후 처리하는 것이 좋다.
-                        // 여기서는 임시로 0으로 두고 반환.
-                        0,
-                        response.regionName(),
-                        response.categoryName(),
-                        response.totalScore(),
-                        response.badge()
-                ))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
-                    // 리스트가 생성된 후 순위(rank) 번호 부여
-                    AtomicInteger rank = new AtomicInteger(1);
-                    return list.stream()
-                            .map(r -> new StartupRankingResponse(
-                                    rank.getAndIncrement(),
-                                    r.regionName(),
-                                    r.categoryName(),
-                                    r.totalScore(),
-                                    r.badge()
-                            ))
-                            .toList();
-                }));
+                .toList();
     }
 
     /**
@@ -91,6 +75,12 @@ public class MarketAnalysisService {
                 .map(MarketMapResponse::from)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 내부에서만 사용하는 중간 데이터용 레코드 (Java 17 기능)
+     * - 통계 데이터와 계산된 점수, 뱃지를 묶어서 관리
+     */
+    private record MarketScoreResult(MarketStats stats, double score, String badge) {}
 
    // --- 내부 메서드 ---
 

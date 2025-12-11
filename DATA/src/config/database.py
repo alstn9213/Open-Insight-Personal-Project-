@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 
-db_connection_str = 'mysql+pymysql://root:1234@localhost:3310/open_insight_db'
+db_connection_str = 'mysql+pymysql://root:@localhost:3306/open_insight_db'
 db_connection = create_engine(db_connection_str)
 
 def get_connection():

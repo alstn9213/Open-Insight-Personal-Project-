@@ -17,7 +17,7 @@ class MarketRepository:
     try:
       with self.engine.connect() as conn:
         regions_df = pd.read_sql(
-          text("SELECT region_if, adm_code, province, district FROM regions"),
+          text("SELECT region_id, adm_code, province, district FROM regions"),
           conn
         )
         categories_df = pd.read_sql(
@@ -31,11 +31,13 @@ class MarketRepository:
     
   def get_existing_keys(self, target_date: str) -> set:
    
-    query = text("""
+    query = text(
+      """
         SELECT region_id, category_id
         FROM market_stats
         WHERE DATE(created_at) = :target_date
-    """)
+      """
+      )
     
     try:
       with self.engine.connect() as conn:
