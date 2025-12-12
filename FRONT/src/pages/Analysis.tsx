@@ -1,4 +1,3 @@
-// src/pages/Analysis.tsx
 import { useState, useEffect } from "react";
 import AnalysisMap from "../components/map/AnalysisMap";
 import type { GeoJsonCollection, MarketMapData } from "../types/map";
@@ -6,78 +5,56 @@ import type { MarketDetailResponse } from "../types/market";
 // import axiosClient from "../api/axiosClient";
 import GradeBadge from "../components/chart/ScoreChart";
 import AnalysisChart from "../components/chart/AnalysisChart";
+import { marketApi } from "../api/marketApi";
 
-
-const MOCK_MAP_DATA: MarketMapData[] = [
-  { admCode: "11680510", district: "강남구", marketGrade: "GREEN", storeCount: 520, netGrowthRate: 3.5 },
-  { admCode: "11440660", district: "마포구", marketGrade: "RED", storeCount: 310, netGrowthRate: -1.2 },
-  { admCode: "11110515", district: "종로구", marketGrade: "YELLOW", storeCount: 150, netGrowthRate: 0.5 },
-];
-
-// 상세 분석 패널에 표시할 더미 데이터 (클릭 시 나오는 정보)
-const MOCK_DETAIL_DATA: MarketDetailResponse = {
-  statsId: 101,
-  regionName: "서울특별시 강남구 신사동",
-  categoryName: "카페",
-  averageSales: 45000000, // 4,500만 원
-  storeCount: 120,
-  growthRate: 5.2,
-  closingRate: 2.1,
-  netGrowthRate: 3.1,
-  marketGrade: "GREEN",
-  description: "유동인구가 많고 매출이 안정적인 추천 상권입니다.",
-};
 const Analysis = () => {
   const [selectedRegionCode, setSelectedRegionCode] = useState<string | null>(null);
   const [geoJson, setGeoJson] = useState<GeoJsonCollection | null>(null);
-  const [marketDetail, setMarketDetail] = useState<MarketDetailResponse | null>(
-    null
-  );
+  const [marketDetail, setMarketDetail] = useState<MarketDetailResponse | null>(null);
   const [loading, setLoading] = useState(false);
+  const [mapData, setMapData] = useState<MarketMapData[]>([]);
+  const DEFAULT_PROVINCE = "서울특별시";
+  const DEFAULT_CATEGORY_ID = 1;
 
   // GeoJson 로드
   useEffect(() => {
     const fetchGeoJson = async () => {
       try {
-        const response = await fetch(
-          "/assets/geojson/Local_HangJeongDong-master/hangjeongdong_서울특별시.geojson"
-        );
-        if (!response.ok) {
-          throw new Error("GeoJSON 파일을 불러오는데 실패했습니다.");
-        }
-        const data = await response.json();
-        setGeoJson(data);
+        const [response, mapInfoResponse]= await Promise.all([
+          fetch("/assets/geojson/Local_HangJeongDong-master/hangjeongdong_서울특별시.geojson"),
+          marketApi.getMapInfo(DEFAULT_PROVINCE, DEFAULT_CATEGORY_ID)
+        ]);
+
+        if(!response.ok) throw new Error("GeoJSON 파일을 불러오는데 실패했습니다.");
+        const geoData = await response.json();
+        setGeoJson(geoData);
+        setMapData(mapInfoResponse);
+
       } catch (error) {
-        console.error("GeoJSON Load Error:", error);
+        console.error("GeoJSON 데이터 로드 실패:", error);
       }
     };
+
     fetchGeoJson();
+
   }, []);
 
   const handleSelectRegion = async (admCode: string) => {
     const shortAdmCode = admCode.substring(0, 8);
     setSelectedRegionCode(shortAdmCode);
     setLoading(true);
+    setMarketDetail(null);
 
-    setTimeout(()=>{
-      setMarketDetail({
-        ...MOCK_DETAIL_DATA,
-        regionName: `서울 특별시 구역 (${shortAdmCode})`,
-      });
+    try {
+      const marketData = await marketApi.getMarketAnalysis(shortAdmCode, DEFAULT_CATEGORY_ID);
+      setMarketDetail(marketData);
+
+    } catch(error) {
+      console.error("상세 분석 데이터 로드 실패: ", error);
+      
+    } finally {
       setLoading(false);
-    }, 500);
-    // try {
-    //   const categoryId = 1;
-    //   const response  = await axiosClient.get<MarketDetailResponse>("/market/analysis", {
-    //     params: {admCode: shortAdmCode, categoryId}
-    //   });
-    //   setMarketDetail(response.data);
-    // } catch(error) {
-    //   console.error("상세 분석 데이터 로드 실패: ", error);
-    //   setMarketDetail(null);
-    // } finally {
-    //   setLoading(false);
-    // }
+    }
   };
 
   return (
@@ -88,7 +65,7 @@ const Analysis = () => {
         {/* 왼쪽: 지도 영역 */}
         <div className="w-2/3 h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative bg-white">
           <AnalysisMap
-            mapData={MOCK_MAP_DATA} // 추후 API(/market/map-info) 데이터로 교체 필요
+            mapData={mapData}
             geoJson={geoJson}
             onSelectRegion={handleSelectRegion}
           />
