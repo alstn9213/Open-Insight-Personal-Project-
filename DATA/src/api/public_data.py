@@ -12,7 +12,7 @@ class PublicDataClient:
     self.seoul_api_key = seoul_api_key
     self.seoul_api_url = seoul_api_url
 
-  def fetch_store_count(self, adm_code: str) -> int:
+  def fetch_store_count(self, adm_code: str, category_code: str = None) -> int:
     params = {
       "serviceKey": self.public_api_key,
       "pageNo": 1,
@@ -21,13 +21,19 @@ class PublicDataClient:
       "key": adm_code,
       "type": "json"
     }
+
+    # 공공데이터 상권정보 API에서 소분류 코드를 사용하는 파라미터 키: indsSclsCd
+    if category_code:
+      params["indsSclsCd"] = category_code
+
     try:
       response = requests.get(self.public_api_url, params=params, timeout=10)
       if response.status_code == 200:
         data = response.json()
+        logger.info(f"API Response: {data}")
         if "body" in data and "totalCount" in data["body"]:
           return int(data["body"]["totalCount"])
-      logger.warning(f"API 호출 실패 또는 데이터 없음 (Code: {response.status_code})")
+      logger.warning(f"업종 카테고리 API 호출 결과 데이터 없음 (Code: {response.status_code}, Adm: {adm_code}, Cat: {category_code}")
       return 0
     
     except Exception as e:

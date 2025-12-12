@@ -1,7 +1,7 @@
-import pandas as pd
 import sys
 import os
 import json
+import pandas as pd
 
 current_dir = os.path.dirname(os.path.abspath(__file__)) # /src/etl
 project_root = os.path.abspath(os.path.join(current_dir, "../../")) # /DATA
@@ -9,7 +9,36 @@ sys.path.append(project_root)
 
 from src.config.database import db_connection
 
-TARGET_CATEGORIES = ["편의점", "카페", "치킨", "미용실", "한식", "커피전문점"]
+# geojson 파일은 통계청(7자리)코드 사용 
+# 공공데이터 포털 API는 행정안전부(8자리)코드 사용
+# 둘을 매핑
+KOSTAT_TO_MOIS_GU = {
+    "11010": "11110", # 종로구
+    "11020": "11140", # 중구
+    "11030": "11170", # 용산구
+    "11040": "11200", # 성동구
+    "11050": "11215", # 광진구
+    "11060": "11230", # 동대문구
+    "11070": "11260", # 중랑구
+    "11080": "11290", # 성북구
+    "11090": "11305", # 강북구
+    "11100": "11320", # 도봉구
+    "11110": "11350", # 노원구
+    "11120": "11380", # 은평구
+    "11130": "11410", # 서대문구
+    "11140": "11440", # 마포구
+    "11150": "11470", # 양천구
+    "11160": "11500", # 강서구
+    "11170": "11530", # 구로구
+    "11180": "11545", # 금천구
+    "11190": "11560", # 영등포구
+    "11200": "11590", # 동작구
+    "11210": "11620", # 관악구
+    "11220": "11650", # 서초구
+    "11230": "11680", # 강남구
+    "11240": "11710", # 송파구
+    "11250": "11740", # 강동구
+}
 
 def init_basic_data():
   print("기초 데이터 적재를 시작합니다...")
@@ -22,7 +51,6 @@ def init_basic_data():
     except UnicodeDecodeError:
       df_csv = pd.read_csv(csv_path, encoding="utf-8")
 
-    filtered_df = df_csv[df_csv["소분류명"].isin(TARGET_CATEGORIES)].copy()
     categories = df_csv[["소분류명"]].rename(columns={"소분류명": "name"})
 
     with db_connection.connect() as conn:
@@ -50,10 +78,23 @@ def init_basic_data():
      
     for feature in geo_data["features"]:
       props = feature["properties"]
-      full_adm_code = props.get("adm_cd")
+      full_adm_code = str(props.get("adm_cd"))
       full_name = props.get("adm_nm")
 
       if full_adm_code and full_name:
+
+        fianl_adm_cdoe = full_adm_code
+
+        if len(full_adm_code) == 7:
+          gu_code_kostat = full_adm_code[:5] # 앞 5자리(서울+구)
+          dong_code = full_adm_code[5:] # 뒤 2자리(동)
+
+          if gu_code_kostat in KOSTAT_TO_MOIS_GU:
+            new_gu_code = KOSTAT_TO_MOIS_GU[gu_code_kostat]
+            fianl_adm_cdoe = new_gu_code + dong_code + "0" 
+          else:
+            fianl_adm_cdoe += 0
+
         # 서울특별시 강남구 역삼1동 -> '서울특별시'와 '강남구 역삼1동'으로 분리
         parts = full_name.split(" ", 1)
         province = parts[0]
@@ -62,7 +103,7 @@ def init_basic_data():
         region_list.append({
             "province": province,
             "district": district,
-            "adm_code": str(full_adm_code)
+            "adm_code": fianl_adm_cdoe
         })
 
     regions = pd.DataFrame(region_list)
