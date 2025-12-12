@@ -54,7 +54,6 @@ class MarketDataETL:
 
         adm_code = str(region["adm_code"])
         floating_pop = seoul_pop_map.get(adm_code, 0)
-        store_count = self.api_client.fetch_store_count(adm_code)
 
         for _, category in categories_df.iterrows():
           

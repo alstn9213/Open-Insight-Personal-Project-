@@ -40,6 +40,16 @@ KOSTAT_TO_MOIS_GU = {
     "11250": "11740", # 강동구
 }
 
+TARGET_CATEGORIES = [
+    "커피전문점/카페/다방",
+    "후라이드/양념치킨",
+    "한식/백반/한정식",
+    "편의점",
+    "여성미용실"
+]
+
+TARGET_REGION = "강남구"
+
 def init_basic_data():
   print("기초 데이터 적재를 시작합니다...")
 
@@ -50,6 +60,11 @@ def init_basic_data():
       df_csv = pd.read_csv(csv_path, encoding="cp949")
     except UnicodeDecodeError:
       df_csv = pd.read_csv(csv_path, encoding="utf-8")
+
+    print(f"테스트")
+    filtered_df = df_csv[df_csv["소분류명"].isin(TARGET_CATEGORIES)]
+    if filtered_df.empty:
+      print("필터링 결과 없음.")
 
     categories = df_csv[["소분류명"]].rename(columns={"소분류명": "name"})
 
@@ -82,7 +97,9 @@ def init_basic_data():
       full_name = props.get("adm_nm")
 
       if full_adm_code and full_name:
-
+        if TARGET_REGION not in full_name:
+          continue
+        
         fianl_adm_cdoe = full_adm_code
 
         if len(full_adm_code) == 7:
