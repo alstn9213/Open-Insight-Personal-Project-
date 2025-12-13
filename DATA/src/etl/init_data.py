@@ -40,16 +40,6 @@ KOSTAT_TO_MOIS_GU = {
     "11250": "11740", # 강동구
 }
 
-TARGET_CATEGORIES = [
-    "커피전문점/카페/다방",
-    "후라이드/양념치킨",
-    "한식/백반/한정식",
-    "편의점",
-    "여성미용실"
-]
-
-TARGET_REGION = "강남구"
-
 def init_basic_data():
   print("기초 데이터 적재를 시작합니다...")
 
@@ -61,12 +51,8 @@ def init_basic_data():
     except UnicodeDecodeError:
       df_csv = pd.read_csv(csv_path, encoding="utf-8")
 
-    print(f"테스트")
-    filtered_df = df_csv[df_csv["소분류명"].isin(TARGET_CATEGORIES)]
-    if filtered_df.empty:
-      print("필터링 결과 없음.")
-
-    categories = df_csv[["소분류명"]].rename(columns={"소분류명": "name"})
+    categories = df_csv[["소분류명"]].drop_duplicates().rename(columns={"소분류명": "name"})
+    print(f"총 {len(categories)}개의 업종 데이터를 적재합니다.")
 
     with db_connection.connect() as conn:
       try:
@@ -96,10 +82,7 @@ def init_basic_data():
       full_adm_code = str(props.get("adm_cd"))
       full_name = props.get("adm_nm")
 
-      if full_adm_code and full_name:
-        if TARGET_REGION not in full_name:
-          continue
-        
+      if full_adm_code and full_name:        
         fianl_adm_cdoe = full_adm_code
 
         if len(full_adm_code) == 7:
@@ -128,8 +111,8 @@ def init_basic_data():
     print(f"[Regions] 서울시 {len(regions)}개 행정동 데이터 적재 중...")
 
     with db_connection.connect() as conn:
-       regions.to_sql(name="regions", con=conn, if_exists="append", index=False)
-    print("지역 데이터 초기화 완료")
+      regions.to_sql(name="regions", con=conn, if_exists="append", index=False)
+      print("지역 데이터 초기화 완료")
 
   except FileNotFoundError:
     print("GeoJSON 파일을 찾을 수 없습니다.")

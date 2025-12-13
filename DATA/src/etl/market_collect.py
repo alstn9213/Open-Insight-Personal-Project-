@@ -1,5 +1,7 @@
 import os
 import sys
+import asyncio
+import aiohttp
 import time
 import logging
 from datetime import datetime
@@ -39,63 +41,82 @@ class MarketDataETL:
     self.calculator = MarketMetricsCalculator()
     self.repository = MarketRepository(db_engine=db_connection)
     self.today_str = datetime.now().strftime("%Y-%m-%d")
-    
-  def run(self):
+
+  async def process_single_category(self, session, semaphore, region, category, seoul_pop_map, existing_keys):
+    async with semaphore: # 동시 요청 수 제한
+      adm_code = str(region["adm_code"])
+      cat_name = category["name"]
+      cat_code = CATEGORY_CODES.get(cat_name)
+      store_count = await self.api_client.fetch_store_count(session, adm_code, cat_code)
+      floating_pop = seoul_pop_map.get(adm_code, 0)
+
+      metrics = self.calculator.calculate(
+        store_count=store_count,
+        floating_pop=floating_pop,
+        category_name=cat_name
+      )
+
+      row_data = {
+        "region_id": region["region_id"],
+        "category": category["category_id"],
+        "floating_population": floating_pop,
+        "created_at": datetime.now(),
+        "updated_at": datetime.now()
+      }
+      row_data.update(metrics)
+
+      current_key = (region["region_id"], category["category_id"])
+      delete_key = current_key if current_key in existing_keys else None
+
+      return row_data, delete_key
+
+  async def run_async(self):
     logger.info("상권 분석 데이터 수집을 시작합니다.")
-    try:
-      regions_df, categories_df = self.repository.get_base_info()
-      seoul_pop_map = self.api_client.fetch_seoul_population()
-      existing_keys = self.repository.get_existing_keys(self.today_str)
 
-      market_data_list = []
-      ids_to_delete = []
-      
+    regions_df, categories_df = self.repository.get_base_info()
+    seoul_pop_map = self.api_client.fetch_seoul_population()
+    existing_keys = self.repository.get_existing_keys(self.today_str)
+
+    market_data_list = []
+    ids_to_delete = []
+
+    # 세마포어: 동시에 보낼 최대 요청 수 (공공데이터 포털은 보통 10~50 정도 권장)
+    semaphore = asyncio.Semaphore(20)
+    
+    async with aiohttp.ClientSession() as session:
+
+      tasks = []
+
       for _, region in regions_df.iterrows():
-
-        adm_code = str(region["adm_code"])
-        floating_pop = seoul_pop_map.get(adm_code, 0)
-
         for _, category in categories_df.iterrows():
-          
-          cat_name = category["name"]
-          cat_code = CATEGORY_CODES.get(cat_name)
-          store_count = self.api_client.fetch_store_count(adm_code, cat_code)
-          current_key = (region["region_id"], category["category_id"])
-          
-          if current_key in existing_keys:
-            ids_to_delete.append(current_key)
-
-          metrics = self.calculator.calculate(
-            store_count=store_count,
-            floating_pop=floating_pop,
-            category_name=category["name"]
+          task = asyncio.create_task(
+            self.process_single_category(
+              session, semaphore, region, category, seoul_pop_map, existing_keys
             )
+          )
+          tasks.append(task)
+
+      logger.info(f"총 {len(tasks)}개의 수집 작업이 예약되었습니다.")
+      results = await asyncio.gather(*tasks)
+    
+    for row, del_key in results:
+      if row:
+        market_data_list.append(row)
+      if del_key:
+        ids_to_delete.append(del_key)
           
-          row_data = {
-            "region_id": region["region_id"],
-            "category_id": category["category_id"],
-            "floating_population": floating_pop,
-            "created_at": datetime.now(),
-            "updated_at": datetime.now()
-          }
-          row_data.update(metrics)
+    if ids_to_delete:
+      logger.info(f"기존 중복 데이터 {len(ids_to_delete)}건 삭제 중...")
+      self.repository.delete_market_stats(ids_to_delete, self.today_str)
 
-          market_data_list.append(row_data)
-
-        time.sleep(0.05)
-          
-      if ids_to_delete:
-        logger.info("기존 중복 데이터 삭제를 시작합니다...")
-        self.repository.delete_market_stats(ids_to_delete, self.today_str)
-
-      if market_data_list:
-        logger.info("신규 데이터 적재를 시작합니다...")
-        self.repository.save_market_stats(market_data_list)
+    if market_data_list:
+      logger.info(f"신규 데이터 {len(market_data_list)}건 적재 중...")
+      self.repository.save_market_stats(market_data_list)
         
-      logger.info("작업 완료")
+    logger.info("작업 완료")
 
-    except Exception as e:
-      logger.error(f"ETL 실행 중 오류 발생: {e}")
-      
+  def run(self):
+    asyncio.run(self.run_async())   
+
 if __name__ == "__main__":
   MarketDataETL().run()
