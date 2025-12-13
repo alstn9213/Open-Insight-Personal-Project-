@@ -81,7 +81,7 @@ class MarketDataETL:
     ids_to_delete = []
 
     # 세마포어: 동시에 보낼 최대 요청 수 (공공데이터 포털은 보통 10~50 정도 권장)
-    semaphore = asyncio.Semaphore(20)
+    semaphore = asyncio.Semaphore(5)
     
     async with aiohttp.ClientSession() as session:
 

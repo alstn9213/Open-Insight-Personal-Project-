@@ -1,10 +1,10 @@
 # 📝 [Troubleshooting] Python ETL 데이터 적재 및 DB 트랜잭션 이슈
 
-## 1\. 개요 (Overview)
+## 1. 개요 (Overview)
 
 Python(Pandas, SQLAlchemy)을 활용한 데이터 파이프라인(ETL) 구축 과정에서 발생한 **데이터 미적재 현상** 및 **스키마 불일치 오류**에 대한 원인 분석과 해결 과정을 기술한다.
 
-## 2\. 발생 이슈 및 해결 과정
+## 2. 발생 이슈 및 해결 과정
 
 ### 이슈 1: 실행 로그 성공 후 DB 데이터 미적재 (Transaction Commit)
 
@@ -19,7 +19,6 @@ Python(Pandas, SQLAlchemy)을 활용한 데이터 파이프라인(ETL) 구축 �
       * `Connection` 객체 대신 **`Engine` 객체**를 `to_sql()`의 `con` 파라미터로 직접 전달.
       * `Engine`을 전달할 경우, Pandas 내부에서 커넥션 생성/사용/커밋/종료(Auto-commit) 라이프사이클을 자동으로 관리함.
 
-<!-- end list -->
 
 ```python
 # [Before] Connection 객체 사용 (데이터 안 들어감)
@@ -66,7 +65,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"
 
 -----
 
-## 3\. 결론 및 배운 점
+## 3. 결론 및 배운 점
 
 1.  **ORM/라이브러리 버전 특성 이해:** SQLAlchemy의 버전 변경에 따른 트랜잭션 처리 방식 차이를 이해해야 함.
 2.  **역할 분리:** 스키마 관리(JPA)와 데이터 적재(Python)의 역할을 명확히 하고 실행 순서를 정의해야 데이터 무결성이 보장됨.

@@ -27,22 +27,29 @@ class PublicDataClient:
     if category_code:
       params["indsSclsCd"] = category_code
 
-    try:
-      async with session.get(self.public_api_url, params=params, timeout=10) as response:
-        if response.status == 200:
-          try:
-            # content_type=None은 가끔 공공데이터가 text/html로 줄 때 에러 방지
-            data = await response.json(content_type=None) # json()도 비동기 메서드
-            if "body" in data and "totalCount" in data["body"]:
-              return int(data["body"]["totalCount"])
-          except Exception:
-            pass # JSON 파싱에러 등 무시
-      logger.warning(f"업종 카테고리 API 호출 결과 데이터 없음 (Code: {response.status}, Adm: {adm_code}")
-      return 0
-    
-    except Exception as e:
-      logger.error(f"상가 정보 조회 실패: {e}")
-      return 0
+    max_retries = 3
+    retry_delay = 2
+
+    for attempt in range(max_retries):
+      try:
+        async with session.get(self.public_api_url, params=params, timeout=10) as response:
+          if response.status == 200:
+            try:
+              # content_type=None은 가끔 공공데이터가 text/html로 줄 때 에러 방지
+              data = await response.json(content_type=None) # json()도 비동기 메서드
+              if "body" in data and "totalCount" in data["body"]:
+                return int(data["body"]["totalCount"])
+              else:
+                return 0 # 200 이지만 데이터 바디가 없는 경우
+            except Exception:
+              pass # JSON 파싱에러 등 무시
+            return 0 # 성공했으나 데이터 파싱 실패 등
+        logger.warning(f"업종 카테고리 API 호출 결과 데이터 없음 (Code: {response.status}, Adm: {adm_code})")
+        return 0
+      
+      except Exception as e:
+        logger.error(f"상가 정보 조회 실패: {e}")
+        return 0
 
   # 서울시 인구 데이터는 한 번만 호출하므로 requests 써도 무방
   # 통일성때문에 async 권장하긴 함

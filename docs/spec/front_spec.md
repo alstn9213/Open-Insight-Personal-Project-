@@ -67,7 +67,7 @@ FRONT
 
 -----
 
-### 3\. 💡 핵심 구현 포인트
+### 3. 💡 핵심 구현 포인트
 
 #### 3.1. 타입 시스템 (TypeScript)
 
@@ -95,7 +95,7 @@ FRONT
 
 -----
 
-### 4\. 🚀 라이브러리 (Dependencies)
+### 4. 라이브러리 (Dependencies)
 
 **설치 명령어:**
 
@@ -117,7 +117,7 @@ npm install -D tailwindcss postcss autoprefixer daisyui
 
 ```
 
-### 👨‍💻 예정
+###  예정
 
  **`components/common` vs `components/chart` 분리**:
     * `Badge`나 `Loading` 같은 범용 UI는 `common`으로, 도메인 특화된 차트는 `chart`로 명확히 구분하여 컴포넌트 탐색 시간을 줄였다. `ScoreChart` 내부의 `GradeBadge` 같은 경우, 여러 곳에서 쓰인다면 `common/GradeBadge.tsx`로 추출.
