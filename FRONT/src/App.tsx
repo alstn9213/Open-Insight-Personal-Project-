@@ -5,11 +5,13 @@ import Home from './pages/Home';
 import Analysis from './pages/Analysis';
 import Ranking from './pages/Ranking';
 import Footer from './components/layout/Footer';
+import Signup from './pages/Signup';
+import Login from './pages/Login';
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 flex flex-col">
         <Header />
         
         <main className="flex-grow">
@@ -17,6 +19,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/analysis" element={<Analysis />} />
             <Route path="/ranking" element={<Ranking />} />
+            <Route path="/login" element={<Login />} /> 
+            <Route path="/signup" element={<Signup />} />
           </Routes>
         </main>
         <Footer />
