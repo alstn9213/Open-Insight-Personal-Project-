@@ -4,11 +4,11 @@ export interface MarketDetailResponse {
   statsId: number;
   regionName: string;
   categoryName: string;
-  averageSales: number;
-  storeCount: number;
-  growthRate: number;
-  closingRate: number;
-  netGrowthRate: number;
+  averageSales: number | null;
+  storeCount: number | null;
+  growthRate: number | null;
+  closingRate: number | null;
+  netGrowthRate: number | null;
   marketGrade: MarketGrade;
   description: string;
 }

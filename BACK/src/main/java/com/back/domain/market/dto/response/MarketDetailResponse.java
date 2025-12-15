@@ -7,12 +7,12 @@ public record MarketDetailResponse(
         Long statsId,
         String regionName,      // "서울특별시 강남구" (Region 엔티티 결합)
         String categoryName,
-        long averageSales,
-        int storeCount,
-        int floatingPopulation,
-        double growthRate,
-        double closingRate,
-        double netGrowthRate,
+        Long averageSales,
+        Integer storeCount,
+        Integer floatingPopulation,
+        Double growthRate,
+        Double closingRate,
+        Double netGrowthRate,
         MarketGrade marketGrade,// 등급 (RED, YELLOW, GREEN)
         String description     // "추천 상권"
 ) {

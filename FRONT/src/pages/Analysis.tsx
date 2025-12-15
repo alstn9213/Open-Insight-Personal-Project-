@@ -96,6 +96,7 @@ const Analysis = () => {
       setMarketDetail(data);
     } catch(error) {
       console.error("상세 분석 데이터 로드 실패:", error);
+      alert("해당 지역의 데이터가 없거나 불러오는데 실패했습니다.")
     } finally {
       setLoading(false);
     }
@@ -179,20 +180,20 @@ const Analysis = () => {
               <GradeBadge grade={marketDetail.marketGrade} />
 
               {/* 3. 핵심 요약 카드 */}
-              <div className="stats shadow w-full">
-                <div className="stat place-items-center">
-                  <div className="stat-title">월 평균 매출</div>
-                  <div className="stat-value text-primary text-2xl">
-                    {marketDetail.averageSales.toLocaleString()}원
-                  </div>
-                </div>
-                <div className="stat place-items-center">
-                  <div className="stat-title">순성장률</div>
-                  <div className={`stat-value text-2xl ${marketDetail.netGrowthRate >= 0 ? 'text-success' : 'text-error'}`}>
-                    {marketDetail.netGrowthRate}%
-                  </div>
+              <div className="stat place-items-center">
+                <div className="stat-title">월 평균 매출</div>
+                <div className="stat-value text-primary text-2xl">
+                  {marketDetail.averageSales?.toLocaleString() ?? 0}원
                 </div>
               </div>
+                <div className="stat place-items-center">
+                  <div className="stat-title">순성장률</div>
+                  <div className={`stat-value text-2xl ${
+                    (marketDetail.netGrowthRate ?? 0) >= 0 ? 'text-success' : 'text-error'
+                  }`}>
+                    {marketDetail.netGrowthRate ?? 0}%
+                  </div>
+                </div>
 
               {/* 4. 차트 영역 */}
               <div className="mt-6">

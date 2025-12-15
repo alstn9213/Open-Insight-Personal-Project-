@@ -36,8 +36,8 @@ const AnalysisChart = ({data, loading = false}: AnalysisChartProps) => {
         </h3>
         <div className="relative h-64 w-full">
           <SalesChart
-            averageSales={data.averageSales}
-            storeCount={data.storeCount}
+            averageSales={data.averageSales ?? 0}
+            storeCount={data.storeCount ?? 0}
           />
         </div>
         <div className="mt-4 text-xs text-gray-500 text-center">
@@ -55,9 +55,9 @@ const AnalysisChart = ({data, loading = false}: AnalysisChartProps) => {
         </h3>
         <div className="relative h-64 w-full">
           <GrowthChart
-            growthRate={data.growthRate}
-            closingRate={data.closingRate}
-            netGrowthRate={data.netGrowthRate}
+            growthRate={data.growthRate ?? 0}
+            closingRate={data.closingRate ?? 0}
+            netGrowthRate={data.netGrowthRate ?? 0}
           />
         </div>
         <div className="mt-4 text-xs text-gray-500 text-center">

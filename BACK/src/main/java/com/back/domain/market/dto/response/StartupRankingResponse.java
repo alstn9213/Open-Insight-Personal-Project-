@@ -3,10 +3,10 @@ package com.back.domain.market.dto.response;
 import com.back.domain.market.entity.MarketStats;
 
 public record StartupRankingResponse(
-        int rank,               // 순위 (1, 2, 3...)
+        Integer rank,               // 순위 (1, 2, 3...)
         String regionName,      // 지역명
         String categoryName,    // 업종명
-        double totalScore,      // 계산된 종합 점수 (알고리즘 결과)
+        Double totalScore,      // 계산된 종합 점수 (알고리즘 결과)
         String badge            // "수익성 BEST", "안전성 BEST" 등 뱃지
 ) {
     public static StartupRankingResponse of(int rank, MarketStats stats, double score, String badge) {
