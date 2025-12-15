@@ -1,5 +1,5 @@
 import type { MarketMapData } from "../types/map";
-import type { MarketAnalysisRequest, MarketDetailResponse, StartupRankingResponse } from "../types/market";
+import type { Category, MarketAnalysisRequest, MarketDetailResponse, StartupRankingResponse } from "../types/market";
 import axiosClient from "./axiosClient";
 
 export const marketApi = {
@@ -20,5 +20,10 @@ export const marketApi = {
       params: {province, categoryId},
     });
     return data;
-  }
+  },
+
+  getCategories: async (): Promise<Category[]> => {
+    const { data } = await axiosClient.get<Category[]>("/market/categories");
+    return data;
+  },
 }

@@ -1,4 +1,4 @@
-package com.back.domain.category;
+package com.back.domain.category.entity;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -1,80 +1,161 @@
 import { useState, useEffect } from "react";
 import AnalysisMap from "../components/map/AnalysisMap";
 import type { GeoJsonCollection, MarketMapData } from "../types/map";
-import type { MarketDetailResponse } from "../types/market";
-// import axiosClient from "../api/axiosClient";
+import type { Category, MarketDetailResponse } from "../types/market";
 import GradeBadge from "../components/chart/ScoreChart";
 import AnalysisChart from "../components/chart/AnalysisChart";
 import { marketApi } from "../api/marketApi";
 import { convertToMoisCode } from "../utils/convertToMoisCode";
 
-
-
-
 const Analysis = () => {
   const [selectedRegionCode, setSelectedRegionCode] = useState<string | null>(null);
-  const [geoJson, setGeoJson] = useState<GeoJsonCollection | null>(null);
-  const [marketDetail, setMarketDetail] = useState<MarketDetailResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [mapData, setMapData] = useState<MarketMapData[]>([]);
-  const DEFAULT_PROVINCE = "서울특별시";
-  const DEFAULT_CATEGORY_ID = 1;
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
 
-  // GeoJson 로드
+  const [geoJson, setGeoJson] = useState<GeoJsonCollection | null>(null);
+  const [mapData, setMapData] = useState<MarketMapData[]>([]);
+  const [marketDetail, setMarketDetail] = useState<MarketDetailResponse | null>(null);
+
+  const [loading, setLoading] = useState(false);
+  const [mapLoading, setMapLoading] = useState(false);
+
+  const DEFAULT_PROVINCE = "서울특별시";
+
+  // 초기 데이터 로드
   useEffect(() => {
-    const fetchGeoJson = async () => {
+
+    const initData = async () => {
+
       try {
-        const [response, mapInfoResponse]= await Promise.all([
+        const [geoResponse, categoryResponse]= await Promise.all([
           fetch("/assets/geojson/Local_HangJeongDong-master/hangjeongdong_서울특별시.geojson"),
-          marketApi.getMapInfo(DEFAULT_PROVINCE, DEFAULT_CATEGORY_ID)
+          marketApi.getCategories()
         ]);
 
-        if(!response.ok) throw new Error("GeoJSON 파일을 불러오는데 실패했습니다.");
-        const geoData = await response.json();
+        if(!geoResponse.ok) throw new Error("GeoJSON 로드 실패.");
+
+        const geoData = await geoResponse.json();
         setGeoJson(geoData);
-        setMapData(mapInfoResponse);
+        setCategories(categoryResponse);
+
+        if(categoryResponse.length > 0) {
+          setSelectedCategoryId(categoryResponse[0].id);
+        }
 
       } catch (error) {
-        console.error("GeoJSON 데이터 로드 실패:", error);
+        console.error("초기 데이터 로드 실패:", error);
       }
+
     };
 
-    fetchGeoJson();
+    initData();
 
   }, []);
 
+  // 업종 카테고리가 변경될 때마다 지도 정보 업데이트
+  useEffect(() => {
+
+    const fetchMapData = async () => {
+
+      if(!selectedCategoryId) return;
+      setMapLoading(true);
+
+      try {
+        const data = await marketApi.getMapInfo(DEFAULT_PROVINCE, selectedCategoryId);
+        setMapData(data);
+      } catch(error) {
+        console.error("지도 데이터 로드 실패:", error);
+      } finally {
+        setMapLoading(false);
+      }
+
+    };
+
+    fetchMapData();
+
+  }, [selectedCategoryId]);
+
+  // 지역 선택시 나타나는 상세 분석 핸들러
   const handleSelectRegion = async (admCode: string) => {
+
     const targetAdmCode = convertToMoisCode(admCode);
     setSelectedRegionCode(targetAdmCode);
+
+    await fetchMarketDetail(targetAdmCode, selectedCategoryId);
+
+  };
+
+  // 상세 정보 로드 함수
+  const fetchMarketDetail = async (admCode: string, categoryId: number) => {
+
     setLoading(true);
     setMarketDetail(null);
 
     try {
-      const marketData = await marketApi.getMarketAnalysis(targetAdmCode, DEFAULT_CATEGORY_ID);
-      setMarketDetail(marketData);
-
+      const data = await marketApi.getMarketAnalysis(admCode, categoryId);
+      setMarketDetail(data);
     } catch(error) {
-      console.error("상세 분석 데이터 로드 실패: ", error);
-      
+      console.error("상세 분석 데이터 로드 실패:", error);
     } finally {
       setLoading(false);
     }
+
+  };
+
+  // 카테고리 변경 핸들러
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+
+    const newCategoryId = Number(e.target.value);
+    setSelectedCategoryId(newCategoryId);
+
+    // 이미 지역을 선택했다면 상세 분석 정보도 갱신
+    if(selectedRegionCode) {
+      fetchMarketDetail(selectedRegionCode, newCategoryId);
+    }
+
   };
 
   return (
     <div className="flex flex-col h-screen p-4 gap-4 bg-gray-50">
-      <h1 className="text-2xl font-bold text-gray-800">🗺️ 상권 지도 분석</h1>
+      {/* 상단 헤더 영역: 제목 및 필터 */}
+      <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
+        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          🗺️ 상권 지도 분석
+        </h1>
+        
+        {/* 업종 선택 드롭다운 (DaisyUI Select) */}
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-semibold text-gray-600">분석 업종:</span>
+          <select 
+            className="select select-bordered select-sm w-full max-w-xs"
+            value={selectedCategoryId}
+            onChange={handleCategoryChange}
+            disabled={categories.length === 0}
+          >
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       <div className="flex flex-1 gap-4 overflow-hidden">
         {/* 왼쪽: 지도 영역 */}
         <div className="w-2/3 h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative bg-white">
+          {mapLoading && (
+             <div className="absolute inset-0 z-10 bg-white/50 flex justify-center items-center">
+                <span className="loading loading-spinner text-primary"></span>
+             </div>
+          )}
           <AnalysisMap
             mapData={mapData}
             geoJson={geoJson}
             onSelectRegion={handleSelectRegion}
           />
         </div>
-
+        
         {/* 오른쪽: 상세 정보 패널 */}
         <div className="w-1/3 h-full bg-white p-6 rounded-xl shadow-lg border border-gray-200 overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4 border-b pb-2">
@@ -117,16 +198,6 @@ const Analysis = () => {
               <div className="mt-6">
                 <AnalysisChart data={marketDetail} loading={loading} />
               </div>
-
-              {/* 5. 한줄 평 */}
-              <div className="alert alert-info shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-current shrink-0 w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                <div>
-                  <h3 className="font-bold">분석 결과 요약</h3>
-                  <div className="text-xs">{marketDetail.description}</div>
-                </div>
-              </div>
-
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-64 text-gray-400">

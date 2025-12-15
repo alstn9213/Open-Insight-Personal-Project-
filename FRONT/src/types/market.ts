@@ -32,3 +32,8 @@ export interface StartupRankingResponse {
   totalScore: number;
   badge: string | null;
 }
+
+export interface Category {
+  id: number;
+  name: string;
+}

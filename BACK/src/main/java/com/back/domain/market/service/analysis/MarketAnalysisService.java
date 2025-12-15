@@ -1,5 +1,7 @@
 package com.back.domain.market.service.analysis;
 
+import com.back.domain.category.entity.Category;
+import com.back.domain.category.repository.CategoryRepository;
 import com.back.domain.market.dto.request.MarketAnalysisRequest;
 import com.back.domain.market.dto.request.MarketAnalysisRequest.WeightOption;
 import com.back.domain.market.entity.MarketStats;
@@ -24,6 +26,7 @@ import java.util.stream.IntStream;
 public class MarketAnalysisService {
 
     private final MarketStatsRepository marketStatsRepository;
+    private final CategoryRepository categoryRepository;
 
     // 상권 상세 분석
     @Cacheable(value = "marketAnalysis", key = "#admCode + '_' + #categoryId")
@@ -74,6 +77,11 @@ public class MarketAnalysisService {
         return statsList.stream()
                 .map(MarketMapResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    @Cacheable(value = "categories", key = "'all'")
+    public List<Category> getAllCategories() {
+        return categoryRepository.findAll();
     }
 
     /**

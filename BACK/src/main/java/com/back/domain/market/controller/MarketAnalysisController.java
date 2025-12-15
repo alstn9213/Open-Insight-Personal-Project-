@@ -1,5 +1,6 @@
 package com.back.domain.market.controller;
 
+import com.back.domain.category.entity.Category;
 import com.back.domain.market.dto.request.MarketAnalysisRequest;
 import com.back.domain.market.dto.response.MarketDetailResponse;
 import com.back.domain.market.dto.response.MarketMapResponse;
@@ -45,6 +46,12 @@ public class MarketAnalysisController {
     ) {
         List<MarketMapResponse> mapInfo = marketAnalysisService.getMapInfo(province, categoryId);
         return ResponseEntity.ok(mapInfo);
+    }
+
+    // 업종 목록 조회
+    @GetMapping("/categories")
+    public ResponseEntity<List<Category>> getCategories() {
+        return ResponseEntity.ok(marketAnalysisService.getAllCategories());
     }
 
 }

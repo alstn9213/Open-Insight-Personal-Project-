@@ -1,6 +1,6 @@
 package com.back.domain.market.entity;
 
-import com.back.domain.category.Category;
+import com.back.domain.category.entity.Category;
 import com.back.domain.common.BaseTimeEntity;
 import com.back.domain.region.entity.Region;
 import jakarta.persistence.*;
