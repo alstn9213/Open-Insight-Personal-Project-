@@ -93,26 +93,43 @@ public class MarketAnalysisService {
 
     /**
      * 내부에서만 사용하는 중간 데이터용 레코드 (Java 17 기능)
-     * - 통계 데이터와 계산된 점수, 뱃지를 묶어서 관리
+     * 통계 데이터와 계산된 점수, 뱃지를 묶어서 관리
+     * 나중에 기능이 많아지면 외부 레코드로 분리 가능
      */
     private record MarketScoreResult(MarketStats stats, double score, String badge) {}
 
    // --- 내부 메서드 ---
 
-    private double calculateScore(MarketStats stats, MarketAnalysisRequest.WeightOption weights) {
-        double salesScore = (stats.getAverageSales() / 10000.0);
+    private double calculateScore(MarketStats stats, WeightOption weights) {
 
-        // 유동인구가 많으면 가산점(1000명당 1점)
-        double populationBonus = (stats.getFloatingPopulation() != null)
-                ? (stats.getFloatingPopulation() / 1000.0) * 0.1
+        // 월 매출 1억원을 100점 만점으로 설정
+        double rawSalesScore = stats.getAverageSales() / 100_000_000.0 * 100;
+        double salesScore = Math.min(rawSalesScore, 100.0);
+
+        // 폐업률이 낮아질수록 높은 점수(폐업률이 10%면 0점)
+        double rawStabilityScore = (10.0 - stats.getClosingRate()) * 10;
+        double stabilityScore = Math.max(rawStabilityScore, 0.0);
+
+        // 성장률 10% 이상이면 100점
+        double rawGrowthScore = stats.getGrowthRate() * 10;
+        double growthScore = Math.min(rawGrowthScore, 100.0);
+
+        // 유동인구가 많으면 가산점 (1만명당 1점, 최대 10점)
+        double rawPopulationBonus = (stats.getFloatingPopulation() != null)
+                ? stats.getFloatingPopulation() / 10_000.0
                 : 0.0;
+        double populationBonus = Math.min(rawPopulationBonus, 10.0);
 
-        double score = (salesScore * weights.salesWeight())
-                - (stats.getClosingRate() * weights.stabilityWeight() * 100) // 폐업률 비중 증폭
-                + (stats.getGrowthRate() * weights.growthWeight())
+        // 종합 점수 계산
+        double totalScore = (salesScore * weights.salesWeight())
+                + (stabilityScore * weights.stabilityWeight())
+                + (growthScore * weights.growthWeight())
                 + populationBonus;
 
-        return Math.max(score, 0.0); // 점수가 음수가 나오지 않도록 보정
+        // 최종 점수는 0 ~ 100점
+        double finalScore = Math.max(0.0, Math.min(totalScore, 100.0));
+
+        return Math.round(finalScore * 10) / 10.0;
     }
 
     private String determineBadge(MarketStats stats) {
