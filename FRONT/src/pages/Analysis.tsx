@@ -6,6 +6,10 @@ import type { MarketDetailResponse } from "../types/market";
 import GradeBadge from "../components/chart/ScoreChart";
 import AnalysisChart from "../components/chart/AnalysisChart";
 import { marketApi } from "../api/marketApi";
+import { convertToMoisCode } from "../utils/convertToMoisCode";
+
+
+
 
 const Analysis = () => {
   const [selectedRegionCode, setSelectedRegionCode] = useState<string | null>(null);
@@ -40,13 +44,13 @@ const Analysis = () => {
   }, []);
 
   const handleSelectRegion = async (admCode: string) => {
-    const shortAdmCode = admCode.substring(0, 8);
-    setSelectedRegionCode(shortAdmCode);
+    const targetAdmCode = convertToMoisCode(admCode);
+    setSelectedRegionCode(targetAdmCode);
     setLoading(true);
     setMarketDetail(null);
 
     try {
-      const marketData = await marketApi.getMarketAnalysis(shortAdmCode, DEFAULT_CATEGORY_ID);
+      const marketData = await marketApi.getMarketAnalysis(targetAdmCode, DEFAULT_CATEGORY_ID);
       setMarketDetail(marketData);
 
     } catch(error) {

@@ -2,6 +2,7 @@
 import { Map as KakaoMap, Polygon, useKakaoLoader } from "react-kakao-maps-sdk";
 import { useMemo, useState } from "react";
 import type { MarketMapData, GeoJsonCollection } from "../../types/map";
+import { convertToMoisCode } from "../../utils/convertToMoisCode";
 
 const GRADE_COLORS = {
   GREEN: { fill: "#00FF00", stroke: "#009900" },
@@ -69,10 +70,10 @@ const AnalysisMap = ({
       {geoJson &&
         geoJson.features.map((feature, index) => {
           const { adm_cd } = feature.properties;
-          const shortAdmCode = adm_cd.substring(0, 8);
+          const targetAdmCode = convertToMoisCode(adm_cd);
 
           // 색상 결정 및 데이터 매핑
-          const regionInfo = mapDataMap.get(shortAdmCode);
+          const regionInfo = mapDataMap.get(targetAdmCode);
           const color =
             regionInfo?.marketGrade && GRADE_COLORS[regionInfo.marketGrade]
               ? GRADE_COLORS[regionInfo.marketGrade]
@@ -95,7 +96,7 @@ const AnalysisMap = ({
           // 4. 폴리곤 렌더링
           return paths.map((path, pathIndex) => (
             <Polygon
-              key={`${shortAdmCode}-${index}-${pathIndex}`}
+              key={`${targetAdmCode}-${index}-${pathIndex}`}
               path={path}
               strokeWeight={1}
               strokeColor={color.stroke}
