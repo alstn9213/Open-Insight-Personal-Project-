@@ -10,8 +10,6 @@ sys.path.append(project_root)
 from src.config.database import db_connection
 from src.config.constants import TARGET_CATEGORY_CODES, KOSTAT_TO_MOIS_GU
 
-
-
 def init_basic_data():
   print("기초 데이터 적재를 시작합니다...")
 
@@ -66,7 +64,7 @@ def init_basic_data():
             new_gu_code = KOSTAT_TO_MOIS_GU[gu_code_kostat]
             fianl_adm_cdoe = new_gu_code + dong_code + "0" 
           else:
-            fianl_adm_cdoe += 0
+            fianl_adm_cdoe += "0"
 
         # 서울특별시 강남구 역삼1동 -> '서울특별시'와 '강남구 역삼1동'으로 분리
         parts = full_name.split(" ", 1)

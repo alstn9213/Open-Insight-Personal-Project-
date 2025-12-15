@@ -27,6 +27,10 @@ const SalesChart = ({averageSales, storeCount}: SalesChartProps) => {
 
   const options = {
     responsive: true,
+    interaction: {
+      mode: 'index' as const,  // 마우스 호버 시 두 막대 모두 툴팁 표시
+      intersect: false,
+    },
     plugins: {
       legend: { position: 'bottom' as const }, // 범례 표시
       title: { display: true, text: "매출 및 규모 분석" },
@@ -36,14 +40,16 @@ const SalesChart = ({averageSales, storeCount}: SalesChartProps) => {
         type: 'linear' as const,
         display: true,
         position: 'left' as const,
-        title: { display: true, text: '매출 (만원)' }
+        title: { display: true, text: '매출 (만원)' },
+        beginAtZero: true 
       },
       y1: {
         type: 'linear' as const,
         display: true,
         position: 'right' as const,
         grid: { drawOnChartArea: false }, // 그리드 선 겹침 방지
-        title: { display: true, text: '점포 수 (개)' }
+        title: { display: true, text: '점포 수 (개)' },
+        beginAtZero: true
       },
     },
   };
