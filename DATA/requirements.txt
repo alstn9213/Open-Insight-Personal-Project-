@@ -1,0 +1,6 @@
+aiohttp
+requests
+python-dotenv
+pandas
+sqlalchemy
+pymysql

@@ -8,37 +8,9 @@ project_root = os.path.abspath(os.path.join(current_dir, "../../")) # /DATA
 sys.path.append(project_root)
 
 from src.config.database import db_connection
+from src.config.constants import TARGET_CATEGORY_CODES, KOSTAT_TO_MOIS_GU
 
-# geojson 파일은 통계청(7자리)코드 사용 
-# 공공데이터 포털 API는 행정안전부(8자리)코드 사용
-# 둘을 매핑
-KOSTAT_TO_MOIS_GU = {
-    "11010": "11110", # 종로구
-    "11020": "11140", # 중구
-    "11030": "11170", # 용산구
-    "11040": "11200", # 성동구
-    "11050": "11215", # 광진구
-    "11060": "11230", # 동대문구
-    "11070": "11260", # 중랑구
-    "11080": "11290", # 성북구
-    "11090": "11305", # 강북구
-    "11100": "11320", # 도봉구
-    "11110": "11350", # 노원구
-    "11120": "11380", # 은평구
-    "11130": "11410", # 서대문구
-    "11140": "11440", # 마포구
-    "11150": "11470", # 양천구
-    "11160": "11500", # 강서구
-    "11170": "11530", # 구로구
-    "11180": "11545", # 금천구
-    "11190": "11560", # 영등포구
-    "11200": "11590", # 동작구
-    "11210": "11620", # 관악구
-    "11220": "11650", # 서초구
-    "11230": "11680", # 강남구
-    "11240": "11710", # 송파구
-    "11250": "11740", # 강동구
-}
+
 
 def init_basic_data():
   print("기초 데이터 적재를 시작합니다...")
@@ -51,7 +23,8 @@ def init_basic_data():
     except UnicodeDecodeError:
       df_csv = pd.read_csv(csv_path, encoding="utf-8")
 
-    categories = df_csv[["소분류명"]].drop_duplicates().rename(columns={"소분류명": "name"})
+    df_filtered = df_csv[df_csv["소분류코드"].isin(TARGET_CATEGORY_CODES)]
+    categories = df_filtered[["소분류명"]].drop_duplicates().rename(columns={"소분류명": "name"})
     print(f"총 {len(categories)}개의 업종 데이터를 적재합니다.")
 
     with db_connection.connect() as conn:

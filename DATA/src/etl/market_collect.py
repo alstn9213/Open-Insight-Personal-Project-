@@ -58,7 +58,7 @@ class MarketDataETL:
 
       row_data = {
         "region_id": region["region_id"],
-        "category": category["category_id"],
+        "category_id": category["category_id"],
         "floating_population": floating_pop,
         "created_at": datetime.now(),
         "updated_at": datetime.now()
