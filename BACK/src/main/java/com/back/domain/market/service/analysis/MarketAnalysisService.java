@@ -39,7 +39,14 @@ public class MarketAnalysisService {
     // 창업 추천 순위
     @Transactional(readOnly = true)
     public List<StartupRankingResponse> recommendStartups(MarketAnalysisRequest request) {
-        List<MarketStats> allStats = marketStatsRepository.findAllByRegionAdmCode(request.admCode());
+        List<MarketStats> allStats;
+
+        if(request.admCode() == null) {
+            allStats = marketStatsRepository.findAllWithDetails();
+        } else {
+            allStats = marketStatsRepository.findAllByRegionAdmCode(request.admCode());
+        }
+
         WeightOption weights = request.weightOption();
 
         List<MarketScoreResult> topRankedMarkets = allStats.stream()

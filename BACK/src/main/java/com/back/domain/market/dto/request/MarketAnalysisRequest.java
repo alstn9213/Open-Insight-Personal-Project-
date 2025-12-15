@@ -1,10 +1,8 @@
 package com.back.domain.market.dto.request;
 
-import jakarta.validation.constraints.NotNull;
-
 public record MarketAnalysisRequest(
-        @NotNull(message = "행정동 코드는 필수입니다.") String admCode,
-        @NotNull(message = "업종 ID는 필수입니다.") Long categoryId,
+        String admCode,
+        Long categoryId,
         WeightOption weightOption
 ) {
     public MarketAnalysisRequest {
