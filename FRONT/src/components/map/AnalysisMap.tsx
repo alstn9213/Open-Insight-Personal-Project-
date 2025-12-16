@@ -5,9 +5,9 @@ import type { MarketMapData, GeoJsonCollection } from "../../types/map";
 import { convertToMoisCode } from "../../utils/convertToMoisCode";
 
 const GRADE_COLORS = {
-  GREEN: { fill: "#00FF00", stroke: "#009900" },
-  YELLOW: { fill: "#FFFF00", stroke: "#999900" },
-  RED: { fill: "#FF0000", stroke: "#990000" },
+  GREEN: { fill: "#00FF00", stroke: "#009900", label: "추천 (성장/안전)" },
+  YELLOW: { fill: "#FFFF00", stroke: "#999900", label: "주의 (정체)" },
+  RED: { fill: "#FF0000", stroke: "#990000", label: "위험 (쇠퇴)" },
 } as const;
 
 interface AnalysisMapProps {
@@ -15,6 +15,49 @@ interface AnalysisMapProps {
   geoJson: GeoJsonCollection | null;
   onSelectRegion: (admCode: string) => void;
 }
+
+// 1. 범례 컴포넌트 생성 (지도 위에 둥둥 떠있는 상자)
+const MapLegend = () => {
+  return (
+    <div className="absolute bottom-8 right-8 z-[100] bg-white/95 p-4 rounded-xl shadow-xl border border-gray-200 backdrop-blur-sm">
+      <h4 className="text-sm font-bold mb-3 text-gray-800 border-b pb-2">
+        🚦 상권 등급 안내
+      </h4>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-2">
+          <span
+            className="w-4 h-4 rounded shadow-sm border border-gray-300"
+            style={{ backgroundColor: GRADE_COLORS.GREEN.fill }}
+          ></span>
+          <span className="text-xs text-gray-600 font-medium">
+            {GRADE_COLORS.GREEN.label}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="w-4 h-4 rounded shadow-sm border border-gray-300"
+            style={{ backgroundColor: GRADE_COLORS.YELLOW.fill }}
+          ></span>
+          <span className="text-xs text-gray-600 font-medium">
+            {GRADE_COLORS.YELLOW.label}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span
+            className="w-4 h-4 rounded shadow-sm border border-gray-300"
+            style={{ backgroundColor: GRADE_COLORS.RED.fill }}
+          ></span>
+          <span className="text-xs text-gray-600 font-medium">
+            {GRADE_COLORS.RED.label}
+          </span>
+        </div>
+      </div>
+      <p className="text-[10px] text-gray-400 mt-3 text-center">
+        * 순성장률 기준
+      </p>
+    </div>
+  );
+};
 
 const AnalysisMap = ({
   mapData,
@@ -67,6 +110,7 @@ const AnalysisMap = ({
       style={{ width: "100%", height: "100%" }}
       level={8}
     >
+      <MapLegend />
       {geoJson &&
         geoJson.features.map((feature, index) => {
           const { adm_cd } = feature.properties;
