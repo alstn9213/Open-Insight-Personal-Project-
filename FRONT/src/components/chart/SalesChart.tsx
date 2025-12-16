@@ -27,6 +27,7 @@ const SalesChart = ({averageSales, storeCount}: SalesChartProps) => {
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     interaction: {
       mode: 'index' as const,  // 마우스 호버 시 두 막대 모두 툴팁 표시
       intersect: false,
@@ -36,6 +37,13 @@ const SalesChart = ({averageSales, storeCount}: SalesChartProps) => {
       title: { display: true, text: "매출 및 규모 분석" },
     },
     scales: {
+      x: {
+        type: 'category' as const,
+        display: true,
+        grid: {
+          display: false // 세로 그리드 선은 지저분해 보일 수 있어 끄는 것을 추천
+        }
+      },
       y: {
         type: 'linear' as const,
         display: true,

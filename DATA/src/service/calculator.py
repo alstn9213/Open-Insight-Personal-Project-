@@ -21,7 +21,7 @@ class MarketMetricsCalculator:
     if category_name in ["카페", "편의점"]:
        pop_weight = 0.8 # 유동인구 수에 민감한 업종
     else:
-       pop_weight = 0.5 # 덜 민감한 업정
+       pop_weight = 0.5 # 덜 민감한 업종
 
     # 유효 수요 = 유동인구 * 업종 가중치
     potential_customers = floating_pop * pop_weight 
