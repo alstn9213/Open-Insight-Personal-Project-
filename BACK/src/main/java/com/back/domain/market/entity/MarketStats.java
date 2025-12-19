@@ -34,12 +34,7 @@ public class MarketStats extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer floatingPopulation; // 유동인구
 
-    private Double growthRate; // 점포 증가율 (%)
-    private Double closingRate; // 폐업률 (%)
-    private Long averageSales; // 평균 매출 (원)
-    private Double netGrowthRate; // 순성장률 (성장률 - 폐업률)
-
-    // 시장 등급 (RED, YELLOW, GREEN)
+    // 밀도 등급 (여유, 보통, 밀집)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MarketGrade marketGrade;

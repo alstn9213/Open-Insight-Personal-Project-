@@ -138,5 +138,3 @@ public interface MarketStatsRepository extends JpaRepository<MarketStats, Long>,
 | :--- | :--- | :--- | :--- |
 | **단순 조회** | **Spring Data JPA** <br> (`@Query`, 메서드 명명법) | 조건이 고정되어 있거나 단순한 CRUD | `findById`, `findByAdmCode` |
 | **복잡한 검색** | **QueryDSL** | 사용자 입력에 따라 `WHERE` 절이 변하는 동적 쿼리, 복잡한 통계 | `searchMarket`, `getRankings` |
-
-![alt text](image.png)

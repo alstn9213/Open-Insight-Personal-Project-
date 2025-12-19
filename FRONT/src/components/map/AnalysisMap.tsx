@@ -5,9 +5,9 @@ import type { MarketMapData, GeoJsonCollection } from "../../types/map";
 import { convertToMoisCode } from "../../utils/convertToMoisCode";
 
 const GRADE_COLORS = {
-  GREEN: { fill: "#00FF00", stroke: "#009900", label: "추천 (성장/안전)" },
-  YELLOW: { fill: "#FFFF00", stroke: "#999900", label: "주의 (정체)" },
-  RED: { fill: "#FF0000", stroke: "#990000", label: "위험 (쇠퇴)" },
+  GREEN: { fill: "#00FF00", stroke: "#009900", label: "유망 (경쟁자 적음)" },
+  YELLOW: { fill: "#FFFF00", stroke: "#999900", label: "보통 (경쟁자 적당)" },  
+  RED: { fill: "#FF0000", stroke: "#990000", label: "과밀 (경쟁자 많음)" },
 } as const;
 
 interface AnalysisMapProps {

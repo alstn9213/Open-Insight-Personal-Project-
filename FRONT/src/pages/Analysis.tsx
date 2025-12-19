@@ -180,20 +180,34 @@ const Analysis = () => {
               <GradeBadge grade={marketDetail.marketGrade} />
 
               {/* 3. 핵심 요약 카드 */}
-              <div className="stat place-items-center">
-                <div className="stat-title">월 평균 매출</div>
-                <div className="stat-value text-primary text-2xl">
-                  {marketDetail.averageSales?.toLocaleString() ?? 0}원
-                </div>
-              </div>
+              <div className="stats shadow mb-6 w-full">
+  
                 <div className="stat place-items-center">
-                  <div className="stat-title">순성장률</div>
-                  <div className={`stat-value text-2xl ${
-                    (marketDetail.netGrowthRate ?? 0) >= 0 ? 'text-success' : 'text-error'
-                  }`}>
-                    {marketDetail.netGrowthRate ?? 0}%
+                  <div className="stat-title">경쟁 점포 수</div>
+                  <div className="stat-value text-secondary text-2xl">
+                    {marketDetail.storeCount.toLocaleString()}개
+                  </div>
+                  <div className="stat-desc">선택 지역 내</div>
+                </div>
+                
+                <div className="stat place-items-center">
+                  <div className="stat-title">잠재 고객(유동)</div>
+                  <div className="stat-value text-secondary text-2xl">
+                    {(marketDetail.floatingPopulation / 10000).toFixed(1)}만명
                   </div>
                 </div>
+
+              </div>
+
+              {/* 핵심 지표 하이라이트 */}
+              <div className="alert shadow-lg bg-base-100 border-l-4 border-primary">
+                <div>
+                  <h3 className="font-bold">점포 1곳당 약 {Math.round(marketDetail.populationPerStore)}명의 유동인구</h3>
+                  <div className="text-xs text-gray-500">
+                    이 수치가 높을수록 경쟁 강도가 낮아 영업하기 유리한 환경입니다.
+                  </div>
+                </div>
+              </div>
 
               {/* 4. 차트 영역 */}
               <div className="mt-6">

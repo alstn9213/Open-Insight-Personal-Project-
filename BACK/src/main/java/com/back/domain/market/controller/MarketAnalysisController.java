@@ -30,12 +30,12 @@ public class MarketAnalysisController {
         return ResponseEntity.ok(response);
     }
 
-    // 맞춤형 창업 순위 추천
-    @PostMapping("/recommend")
-    public ResponseEntity<List<StartupRankingResponse>> recommendStartup(
+    // 순위
+    @PostMapping("/ranking")
+    public ResponseEntity<List<StartupRankingResponse>> getMarketRankings(
             @Valid @RequestBody MarketAnalysisRequest request
     ) {
-        List<StartupRankingResponse> rankings = marketAnalysisService.recommendStartups(request);
+        List<StartupRankingResponse> rankings = marketAnalysisService.getMarketRankings(request);
         return ResponseEntity.ok(rankings);
     }
 

@@ -1,14 +1,14 @@
 export type MarketGrade = "GREEN" | "YELLOW" | "RED";
 
+export type SortOption = 'OPPORTUNITY' | 'OVERCROWDED' | 'POPULATION' | 'STORE_COUNT';
+
 export interface MarketDetailResponse {
   statsId: number;
   regionName: string;
   categoryName: string;
-  averageSales: number | null;
-  storeCount: number | null;
-  growthRate: number | null;
-  closingRate: number | null;
-  netGrowthRate: number | null;
+  storeCount: number;
+  floatingPopulation: number;
+  populationPerStore: number
   marketGrade: MarketGrade;
   description: string;
 }
@@ -22,14 +22,16 @@ export interface WeightOption {
 export interface MarketAnalysisRequest {
   admCode: string | null;       // 전체 지역 대상일 경우 null
   categoryId: number | null;    // 전체 업종 대상일 경우 null
-  weightOption: WeightOption;
+  sortOption: SortOption;
 }
 
 export interface StartupRankingResponse {
-  rank: number;
+  statsId: number;
   regionName: string;
   categoryName: string;
-  totalScore: number;
+  storeCount: number;
+  floatingPopulation: number;
+  populationPerStore: number;
   badge: string | null;
 }
 

@@ -10,8 +10,8 @@ export const marketApi = {
     return data;
   },
 
-  getStartupRanking: async (request: MarketAnalysisRequest): Promise<StartupRankingResponse[]> => {
-    const {data} = await axiosClient.post<StartupRankingResponse[]>('/market/recommend', request);
+  getMarkgetRankings: async (request: MarketAnalysisRequest): Promise<StartupRankingResponse[]> => {
+    const {data} = await axiosClient.post<StartupRankingResponse[]>('/market/ranking', request);
     return data;
   },
 
