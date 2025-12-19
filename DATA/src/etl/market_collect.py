@@ -50,19 +50,18 @@ class MarketDataETL:
       store_count = await self.api_client.fetch_store_count(session, adm_code, cat_code)
       floating_pop = seoul_pop_map.get(adm_code, 0)
 
-      metrics = self.calculator.calculate(
-        store_count=store_count,
-        floating_pop=floating_pop,
-        category_name=cat_name
-      )
-
       row_data = {
         "region_id": region["region_id"],
         "category_id": category["category_id"],
-        "floating_population": floating_pop,
         "created_at": datetime.now(),
         "updated_at": datetime.now()
       }
+      
+      metrics = self.calculator.calculate(
+        store_count=store_count,
+        floating_pop=floating_pop
+      )
+
       row_data.update(metrics)
 
       current_key = (region["region_id"], category["category_id"])
@@ -84,9 +83,7 @@ class MarketDataETL:
     semaphore = asyncio.Semaphore(10)
     
     async with aiohttp.ClientSession() as session:
-
       tasks = []
-
       for _, region in regions_df.iterrows():
         for _, category in categories_df.iterrows():
           task = asyncio.create_task(
@@ -95,7 +92,6 @@ class MarketDataETL:
             )
           )
           tasks.append(task)
-
       logger.info(f"총 {len(tasks)}개의 수집 작업이 예약되었습니다.")
       results = await asyncio.gather(*tasks)
     

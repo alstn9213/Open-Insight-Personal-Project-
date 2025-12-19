@@ -5,8 +5,8 @@ import com.back.domain.market.entity.MarketGrade;
 
 public record MarketMapResponse(
         String admCode,         // 행정동 코드 (지도 폴리곤 매핑용 key)
-        String district,        // 구 이름 (예: "강남구")
-        Integer storeCount,         // 점포 수 (밀집도 시각화용)
+        String district,
+        Integer storeCount,
         MarketGrade marketGrade// 밀도 등급 (지도 색상 결정: RED, YELLOW, GREEN)
 ) {
     public static MarketMapResponse from(MarketStats stats) {

@@ -16,13 +16,14 @@ public class Region {
     @Column(name = "region_id")
     private Long id;
 
-    // 예: "서울특별시", "부산광역시"
     @Column(nullable = false)
-    private String province;
+    private String province;  // 시
 
-    // 예: "강남구", "해운대구"
     @Column(nullable = false)
-    private String district;
+    private String district; // 구
+
+    @Column(nullable = false)
+    private String town; // 동
 
     @Column(name = "adm_code", unique = true)
     private String admCode;

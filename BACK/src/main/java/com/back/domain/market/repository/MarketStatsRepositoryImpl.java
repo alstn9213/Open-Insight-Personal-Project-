@@ -24,8 +24,7 @@ public class MarketStatsRepositoryImpl implements MarketStatsRepositoryCustom {
                 .join(marketStats.category).fetchJoin()
                 .where(
                         eqProvince(province),
-                        eqCategory(categoryId),
-                        goeSales(minSales)
+                        eqCategory(categoryId)
                 )
                 .fetch();
     }
@@ -39,12 +38,6 @@ public class MarketStatsRepositoryImpl implements MarketStatsRepositoryCustom {
     private BooleanExpression eqCategory(Long categoryId) {
         return categoryId != null
                 ? marketStats.category.id.eq(categoryId)
-                : null;
-    }
-
-    private BooleanExpression goeSales(Long minSales) {
-        return minSales != null
-                ? marketStats.averageSales.goe(minSales)
                 : null;
     }
 }

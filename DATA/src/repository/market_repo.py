@@ -6,18 +6,15 @@ from sqlalchemy.exc import SQLAlchemyError
 logger = logging.getLogger(__name__)
 
 class MarketRepository:
-  """
-  MariaDB(또는 MySQL) 데이터베이스에 대한 CRUD 작업을 전담하는 클래스입니다.
-  """
+
   def __init__(self, db_engine: Engine):
     self.engine = db_engine
     
   def get_base_info(self):
-    
     try:
       with self.engine.connect() as conn:
         regions_df = pd.read_sql(
-          text("SELECT region_id, adm_code, province, district FROM regions"),
+          text("SELECT region_id, adm_code, province, district, town FROM regions"),
           conn
         )
         categories_df = pd.read_sql(
@@ -30,7 +27,6 @@ class MarketRepository:
       raise
     
   def get_existing_keys(self, target_date: str) -> set:
-   
     query = text(
       """
         SELECT region_id, category_id
@@ -48,7 +44,6 @@ class MarketRepository:
       return set()
   
   def delete_market_stats(self, id_pairs: list, target_date: str):
-   
     if not id_pairs:
       return
 
@@ -76,21 +71,14 @@ class MarketRepository:
         raise
   
   def save_market_stats(self, data_list: list):
-    
     if not data_list:
       logger.info("저장할 데이터가 없습니다.")
       return
 
     try:
       df = pd.DataFrame(data_list)
-      
-      # DB 스키마에 없는 컬럼(is_simulated 등)이 있다면 제거 후 저장
-      if "is_simulated" in df.columns:
-          df = df.drop(columns=["is_simulated"])
-
       with self.engine.connect() as conn:
           df.to_sql(name="market_stats", con=conn, if_exists="append", index=False)
-      
       logger.info(f"데이터 {len(df)}건 DB 적재 성공")
         
     except SQLAlchemyError as e:
