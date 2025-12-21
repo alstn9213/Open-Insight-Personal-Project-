@@ -2,7 +2,6 @@
 import { Map as KakaoMap, Polygon, useKakaoLoader } from "react-kakao-maps-sdk";
 import { useMemo, useState } from "react";
 import type { MarketMapData, GeoJsonCollection } from "../../types/map";
-import { convertToMoisCode } from "../../utils/convertToMoisCode";
 
 const GRADE_COLORS = {
   GREEN: { fill: "#00FF00", stroke: "#009900", label: "유망 (경쟁자 적음)" },
@@ -59,11 +58,7 @@ const MapLegend = () => {
   );
 };
 
-const AnalysisMap = ({
-  mapData,
-  geoJson,
-  onSelectRegion,
-}: AnalysisMapProps) => {
+const AnalysisMap = ({mapData, geoJson, onSelectRegion}: AnalysisMapProps) => {
   const [loading, error] = useKakaoLoader({
     appkey: import.meta.env.VITE_KAKAO_MAP_KEY,
     libraries: ["services", "clusterer"],
@@ -76,12 +71,11 @@ const AnalysisMap = ({
   const mapDataMap = useMemo(() => {
     const map = new Map<string, MarketMapData>();
     mapData.forEach((data) => {
-      const shortCode = data.admCode.substring(0, 8);
-      map.set(shortCode, data);
+      map.set(data.admCode, data);
     });
     return map;
   }, [mapData]);
-
+  
   // 좌표 변환 함수 (GeoJSON 경도 위도를 Kakao 경도 위도로)
   const getPathFromRing = (ring: number[][]) => {
     return ring.map((coord) => ({
@@ -113,12 +107,10 @@ const AnalysisMap = ({
       <MapLegend />
       {geoJson &&
         geoJson.features.map((feature, index) => {
-          const { adm_cd } = feature.properties;
-          if (!adm_cd) return null;
-          const targetAdmCode = convertToMoisCode(String(adm_cd));
-
-          // 색상 결정 및 데이터 매핑
-          const regionInfo = mapDataMap.get(targetAdmCode);
+          const props = feature.properties;
+          if(!props) return null;
+          let targetAdmCode = String(props.adm_cd2);
+          const regionInfo = mapDataMap.get(targetAdmCode); // 색상 결정 및 데이터 매핑
           const color =
             regionInfo?.marketGrade && GRADE_COLORS[regionInfo.marketGrade]
               ? GRADE_COLORS[regionInfo.marketGrade]
@@ -130,9 +122,9 @@ const AnalysisMap = ({
           const geometry = feature.geometry;
           const paths: { lat: number; lng: number }[][] = [];
 
-          if (geometry.type === "Polygon") {
+          if(geometry.type === "Polygon") {
             paths.push(getPathFromRing(geometry.coordinates[0]));
-          } else if (geometry.type === "MultiPolygon") {
+          } else if(geometry.type === "MultiPolygon") {
             geometry.coordinates.forEach((polygonCoords) => {
               paths.push(getPathFromRing(polygonCoords[0]));
             });
@@ -158,7 +150,7 @@ const AnalysisMap = ({
                   strokeWeight: 1,
                 })
               }
-              onClick={() => onSelectRegion(adm_cd)}
+              onClick={() => onSelectRegion(targetAdmCode)}
             />
           ));
         })}

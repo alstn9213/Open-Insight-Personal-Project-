@@ -3,7 +3,6 @@ import AnalysisMap from "../components/map/AnalysisMap";
 import type { GeoJsonCollection, MarketMapData } from "../types/map";
 import type { Category, MarketDetailResponse } from "../types/market";
 import { marketApi } from "../api/marketApi";
-import { convertToMoisCode } from "../utils/convertToMoisCode";
 
 const Analysis = () => {
   const [selectedRegionCode, setSelectedRegionCode] = useState<string | null>(null);
@@ -76,9 +75,8 @@ const Analysis = () => {
 
   // 지역 선택시 나타나는 상세 분석 핸들러
   const handleSelectRegion = async (admCode: string) => {
-    const targetAdmCode = convertToMoisCode(admCode);
-    setSelectedRegionCode(targetAdmCode);
-    await fetchMarketDetail(targetAdmCode, selectedCategoryId);
+    setSelectedRegionCode(admCode);
+    await fetchMarketDetail(admCode, selectedCategoryId);
   };
 
   // 상세 정보 로드 함수
@@ -196,7 +194,7 @@ const Analysis = () => {
                 <div>
                   <h3 className="font-bold">점포 1곳당 약 {Math.round(marketDetail.populationPerStore)}명의 유동인구</h3>
                   <div className="text-xs text-gray-500">
-                    이 수치가 높을수록 경쟁 강도가 낮아 영업하기 유리한 환경입니다.
+                    이 수치가 높을수록 영업하기 유리한 환경입니다.
                   </div>
                 </div>
               </div>
