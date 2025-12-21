@@ -98,7 +98,7 @@ const Analysis = () => {
       {/* 상단 헤더 영역: 제목 및 필터 */}
       <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          🗺️ 상권 지도 분석
+          🗺️ 상권 분석
         </h1>
         
         {/* 업종 선택 드롭다운 (DaisyUI Select) */}
