@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import AnalysisMap from "../components/map/AnalysisMap";
 import type { GeoJsonCollection, MarketMapData } from "../types/map";
 import type { Category, MarketDetailResponse } from "../types/market";
-import GradeBadge from "../components/chart/ScoreChart";
-import AnalysisChart from "../components/chart/AnalysisChart";
 import { marketApi } from "../api/marketApi";
 import { convertToMoisCode } from "../utils/convertToMoisCode";
 
@@ -28,7 +26,7 @@ const Analysis = () => {
 
       try {
         const [geoResponse, categoryResponse]= await Promise.all([
-          fetch("/assets/geojson/Local_HangJeongDong-master/hangjeongdong_서울특별시.geojson"),
+          fetch("/assets/geojson/HangJeongDong_ver20250401.geojson"),
           marketApi.getCategories()
         ]);
 
@@ -96,7 +94,6 @@ const Analysis = () => {
       setMarketDetail(data);
     } catch(error) {
       console.error("상세 분석 데이터 로드 실패:", error);
-      alert("해당 지역의 데이터가 없거나 불러오는데 실패했습니다.")
     } finally {
       setLoading(false);
     }
@@ -176,9 +173,7 @@ const Analysis = () => {
                 <p className="text-gray-500 font-medium">{marketDetail.categoryName} 분석 결과</p>
               </div>
 
-              {/* 2. 종합 등급 배지 */}
-              <GradeBadge grade={marketDetail.marketGrade} />
-
+            
               {/* 3. 핵심 요약 카드 */}
               <div className="stats shadow mb-6 w-full">
   
@@ -207,11 +202,6 @@ const Analysis = () => {
                     이 수치가 높을수록 경쟁 강도가 낮아 영업하기 유리한 환경입니다.
                   </div>
                 </div>
-              </div>
-
-              {/* 4. 차트 영역 */}
-              <div className="mt-6">
-                <AnalysisChart data={marketDetail} loading={loading} />
               </div>
             </div>
           ) : (

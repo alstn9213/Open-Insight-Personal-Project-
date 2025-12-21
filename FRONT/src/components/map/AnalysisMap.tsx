@@ -114,7 +114,8 @@ const AnalysisMap = ({
       {geoJson &&
         geoJson.features.map((feature, index) => {
           const { adm_cd } = feature.properties;
-          const targetAdmCode = convertToMoisCode(adm_cd);
+          if (!adm_cd) return null;
+          const targetAdmCode = convertToMoisCode(String(adm_cd));
 
           // 색상 결정 및 데이터 매핑
           const regionInfo = mapDataMap.get(targetAdmCode);
