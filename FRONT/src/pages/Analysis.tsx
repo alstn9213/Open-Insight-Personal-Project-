@@ -21,9 +21,7 @@ const Analysis = () => {
 
   // 초기 데이터 로드
   useEffect(() => {
-
     const initData = async () => {
-
       try {
         const [geoResponse, categoryResponse]= await Promise.all([
           fetch("/assets/geojson/HangJeongDong_ver20250401.geojson"),
@@ -32,8 +30,15 @@ const Analysis = () => {
 
         if(!geoResponse.ok) throw new Error("GeoJSON 로드 실패.");
 
+        // 서울지역(행정동 코드 11)만 필터링
         const geoData = await geoResponse.json();
-        setGeoJson(geoData);
+        const seoulFeatures = geoData.features.filter((feature: any) => {
+          const admCode = String(feature.properties.adm_cd);
+          return admCode.startsWith("11");
+        });
+
+        // 필터링된 features로 GeoJSON 설정
+        setGeoJson({...geoData, features: seoulFeatures});
         setCategories(categoryResponse);
 
         if(categoryResponse.length > 0) {
@@ -47,14 +52,11 @@ const Analysis = () => {
     };
 
     initData();
-
   }, []);
 
   // 업종 카테고리가 변경될 때마다 지도 정보 업데이트
   useEffect(() => {
-
     const fetchMapData = async () => {
-
       if(!selectedCategoryId) return;
       setMapLoading(true);
 
@@ -70,22 +72,17 @@ const Analysis = () => {
     };
 
     fetchMapData();
-
   }, [selectedCategoryId]);
 
   // 지역 선택시 나타나는 상세 분석 핸들러
   const handleSelectRegion = async (admCode: string) => {
-
     const targetAdmCode = convertToMoisCode(admCode);
     setSelectedRegionCode(targetAdmCode);
-
     await fetchMarketDetail(targetAdmCode, selectedCategoryId);
-
   };
 
   // 상세 정보 로드 함수
   const fetchMarketDetail = async (admCode: string, categoryId: number) => {
-
     setLoading(true);
     setMarketDetail(null);
 
