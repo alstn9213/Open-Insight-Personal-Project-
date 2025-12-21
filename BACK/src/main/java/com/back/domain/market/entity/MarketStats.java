@@ -34,6 +34,9 @@ public class MarketStats extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer floatingPopulation; // 유동인구
 
+    @Column(name = "population_per_store")
+    private Double populationPerStore;
+
     // 밀도 등급 (여유, 보통, 밀집)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
