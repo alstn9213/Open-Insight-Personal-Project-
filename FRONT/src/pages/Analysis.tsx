@@ -26,30 +26,23 @@ const Analysis = () => {
           fetch("/assets/geojson/HangJeongDong_ver20250401.geojson"),
           marketApi.getCategories()
         ]);
-
         if(!geoResponse.ok) throw new Error("GeoJSON 로드 실패.");
-
         // 서울지역(행정동 코드 11)만 필터링
         const geoData = await geoResponse.json();
         const seoulFeatures = geoData.features.filter((feature: any) => {
           const admCode = String(feature.properties.adm_cd);
           return admCode.startsWith("11");
         });
-
         // 필터링된 features로 GeoJSON 설정
         setGeoJson({...geoData, features: seoulFeatures});
         setCategories(categoryResponse);
-
         if(categoryResponse.length > 0) {
           setSelectedCategoryId(categoryResponse[0].id);
         }
-
       } catch (error) {
         console.error("초기 데이터 로드 실패:", error);
       }
-
     };
-
     initData();
   }, []);
 
@@ -58,7 +51,6 @@ const Analysis = () => {
     const fetchMapData = async () => {
       if(!selectedCategoryId) return;
       setMapLoading(true);
-
       try {
         const data = await marketApi.getMapInfo(DEFAULT_PROVINCE, selectedCategoryId);
         setMapData(data);
@@ -67,9 +59,7 @@ const Analysis = () => {
       } finally {
         setMapLoading(false);
       }
-
     };
-
     fetchMapData();
   }, [selectedCategoryId]);
 
@@ -83,7 +73,6 @@ const Analysis = () => {
   const fetchMarketDetail = async (admCode: string, categoryId: number) => {
     setLoading(true);
     setMarketDetail(null);
-
     try {
       const data = await marketApi.getMarketAnalysis(admCode, categoryId);
       setMarketDetail(data);
@@ -92,20 +81,16 @@ const Analysis = () => {
     } finally {
       setLoading(false);
     }
-
   };
 
   // 카테고리 변경 핸들러
   const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-
     const newCategoryId = Number(e.target.value);
     setSelectedCategoryId(newCategoryId);
-
     // 이미 지역을 선택했다면 상세 분석 정보도 갱신
     if(selectedRegionCode) {
       fetchMarketDetail(selectedRegionCode, newCategoryId);
     }
-
   };
 
   return (

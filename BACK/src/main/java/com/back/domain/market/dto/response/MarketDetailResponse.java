@@ -21,7 +21,7 @@ public record MarketDetailResponse(
 
         return new MarketDetailResponse(
                 stats.getId(),
-                stats.getRegion().getProvince() + " " + stats.getRegion().getDistrict(),
+                stats.getRegion().getProvince() + " " + stats.getRegion().getDistrict() + " " + stats.getRegion().getTown(),
                 stats.getCategory().getName(),
                 stats.getStoreCount(),
                 stats.getFloatingPopulation(),

@@ -109,7 +109,7 @@ const AnalysisMap = ({mapData, geoJson, onSelectRegion}: AnalysisMapProps) => {
         geoJson.features.map((feature, index) => {
           const props = feature.properties;
           if(!props) return null;
-          let targetAdmCode = String(props.adm_cd2);
+          let targetAdmCode = String(props.adm_cd);
           const regionInfo = mapDataMap.get(targetAdmCode); // 색상 결정 및 데이터 매핑
           const color =
             regionInfo?.marketGrade && GRADE_COLORS[regionInfo.marketGrade]

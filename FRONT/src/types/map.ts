@@ -14,6 +14,7 @@ export type GeoJsonGeometry =
 
 export interface GeoJsonProperties {
   adm_cd: string; // 예: "1111051500"
+  adm_cd2: string;
   adm_nm: string;   // 예: "청운효자동"
   [key: string]: unknown; // 추가 속성이 있을 경우를 대비 (optional)
 }
