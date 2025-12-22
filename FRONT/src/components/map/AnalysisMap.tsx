@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { MarketMapData, GeoJsonCollection } from "../../types/map";
 
 const GRADE_COLORS = {
-  GREEN: { fill: "#00FF00", stroke: "#009900", label: "유망 (경쟁자 적음)" },
+  GREEN: { fill: "#00FF00", stroke: "#009900", label: "기회 (경쟁자 적음)" },
   YELLOW: { fill: "#FFFF00", stroke: "#999900", label: "보통 (경쟁자 적당)" },  
   RED: { fill: "#FF0000", stroke: "#990000", label: "과밀 (경쟁자 많음)" },
 } as const;
@@ -20,7 +20,7 @@ const MapLegend = () => {
   return (
     <div className="absolute bottom-8 right-8 z-[100] bg-white/95 p-4 rounded-xl shadow-xl border border-gray-200 backdrop-blur-sm">
       <h4 className="text-sm font-bold mb-3 text-gray-800 border-b pb-2">
-        🚦 상권 등급 안내
+        🚦 밀집도 등급
       </h4>
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ const MapLegend = () => {
         </div>
       </div>
       <p className="text-[10px] text-gray-400 mt-3 text-center">
-        * 순성장률 기준
+        * 해당 구역의 ( 점포 수 / 유동인구 ) 기준
       </p>
     </div>
   );
@@ -109,7 +109,12 @@ const AnalysisMap = ({mapData, geoJson, onSelectRegion}: AnalysisMapProps) => {
         geoJson.features.map((feature, index) => {
           const props = feature.properties;
           if(!props) return null;
-          let targetAdmCode = String(props.adm_cd);
+          let targetAdmCode = "";
+          if(props.adm_cd2) {
+            targetAdmCode = String(props.adm_cd2).substring(0, 8);
+          } else {
+            targetAdmCode = String(props.adm_cd);
+          }
           const regionInfo = mapDataMap.get(targetAdmCode); // 색상 결정 및 데이터 매핑
           const color =
             regionInfo?.marketGrade && GRADE_COLORS[regionInfo.marketGrade]
