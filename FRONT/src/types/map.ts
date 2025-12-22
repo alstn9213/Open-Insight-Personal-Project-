@@ -36,3 +36,4 @@ export interface MarketMapData {
   marketGrade: "GREEN" | "YELLOW" | "RED";
   netGrowthRate: number;
 }
+
