@@ -154,7 +154,7 @@ const Analysis = () => {
               </div>
 
             
-              {/* 3. 핵심 요약 카드 */}
+              {/* 2. 핵심 요약 카드 */}
               <div className="stats shadow mb-6 w-full">
   
                 <div className="stat place-items-center">
@@ -171,7 +171,44 @@ const Analysis = () => {
                     {(marketDetail.floatingPopulation / 10000).toFixed(1)}만명
                   </div>
                 </div>
+              </div>
 
+              {/* 3. 인구 통계 */}
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                <h4 className="text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
+                   👥 인구 통계
+                </h4>
+
+                <div className="space-y-4">
+                  {/* 성별 분포 시각화 */}
+                  <div>
+                    <div className="flex justify-between text-xs text-gray-500 mb-1">
+                      <span className="text-blue-600 font-bold">👨 남성 {marketDetail.malePercent}%</span>
+                      <span className="text-pink-600 font-bold">👩 여성 {marketDetail.femalePercent}%</span>
+                    </div>
+                    <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden flex shadow-inner">
+                      <div 
+                        className="h-full bg-blue-400 transition-all duration-1000" 
+                        style={{ width: `${marketDetail.malePercent}%` }}
+                      />
+                      <div 
+                        className="h-full bg-pink-400 transition-all duration-1000" 
+                        style={{ width: `${marketDetail.femalePercent}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* 주요 연령대 */}
+                  <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
+                    <span className="text-sm text-gray-500">주 이용 연령층</span>
+                    <div className="flex items-center gap-2">
+                       <span className="badge badge-primary badge-lg font-bold">
+                         {marketDetail.ageGroup}
+                       </span>
+                       <span className="text-xs text-gray-400">비중 1위</span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               {/* 핵심 지표 하이라이트 */}

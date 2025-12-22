@@ -34,6 +34,16 @@ public class MarketStats extends BaseTimeEntity {
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     private Integer floatingPopulation; // 유동인구
 
+    @Column(columnDefinition = "INT DEFAULT 0")
+    private Integer malePopulation;
+
+    @Column(columnDefinition = "INT DEFAULT 0")
+    private Integer femalePopulation;
+
+    // 연령대 그룹 (예: "20대", "30대")
+    @Column(length = 20)
+    private String AgeGroup;
+
     @Column(name = "population_per_store")
     private Double populationPerStore;
 

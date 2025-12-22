@@ -11,13 +11,24 @@ public record MarketDetailResponse(
         Integer floatingPopulation,
         Double populationPerStore,
         MarketGrade marketGrade,// 밀도 등급 (여유, 보통, 밀집)
-        String description     // "경쟁이 치열합니다" 등의 멘트
+        String description,     // "경쟁이 치열합니다" 등의 멘트
+        Integer malePercent,
+        Integer femalePercent,
+        String ageGroup
 ) {
     public static MarketDetailResponse from(MarketStats stats) {
-        // 유동인구가 없거나 점포가 0일 때의 예외처리 로직 필요
+        // 유동인구가 없거나 점포가 0일 때의 예외처리
         double popPerStore = (stats.getStoreCount() > 0)
                 ? (double) stats.getFloatingPopulation() / stats.getStoreCount()
                 : 0.0;
+        int totalPop = stats.getFloatingPopulation();
+        int malePer = 0;
+        int femalePer = 0;
+
+        if(totalPop > 0) {
+            malePer = (int) Math.round(((double) stats.getMalePopulation() / totalPop) * 100);
+            femalePer = 100 - malePer;
+        }
 
         return new MarketDetailResponse(
                 stats.getId(),
@@ -27,7 +38,10 @@ public record MarketDetailResponse(
                 stats.getFloatingPopulation(),
                 Math.round(popPerStore * 10) / 10.0,
                 stats.getMarketGrade(),
-                stats.getMarketGrade().getDescription()
+                stats.getMarketGrade().getDescription(),
+                malePer,
+                femalePer,
+                stats.getAgeGroup() != null ? stats.getAgeGroup() : "분석중"
         );
     }
 

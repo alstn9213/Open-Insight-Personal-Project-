@@ -64,8 +64,24 @@ class PublicDataClient:
         rows = data["SPOP_LOCAL_RESD_DONG"]["row"]
         for row in rows:
           code = str(row["ADSTRD_CODE_SE"]) # ADSTRD_CODE_SE: 행정동코드
-          pop = float(row["TOT_LVPOP_CO"]) # TOT_LVPOP_CO: 총생활인구수
-          pop_map[code] = int(pop)
+          total_pop = int(float(row["TOT_LVPOP_CO"]))
+          male_pop = int(float(row["MALE_LVPOP_CO"]))
+          female_pop = int(float(row["FEMALE_LVPOP_CO"]))
+          age_map = {
+            "10대": int(float(row.get("AGE_10_19_LVPOP_CO", 0))),
+            "20대": int(float(row.get("AGE_20_29_LVPOP_CO", 0))),
+            "30대": int(float(row.get("AGE_30_39_LVPOP_CO", 0))),
+            "40대": int(float(row.get("AGE_40_49_LVPOP_CO", 0))),
+            "50대": int(float(row.get("AGE_50_59_LVPOP_CO", 0))),
+            "60대이상": int(float(row.get("AGE_60_69_LVPOP_CO", 0))) + int(float(row.get("AGE_70_ABOVE_LVPOP_CO", 0)))
+          }
+          main_age_group = max(age_map, key=age_map.get) # 인구수가 가장 많은 연령대
+          pop_map[code] = {
+              "total": total_pop,
+              "male": male_pop,
+              "female": female_pop,
+              "main_age_group": main_age_group
+          }
         logger.info(f"서울 생활 인구 데이터 {len(pop_map)}개 로드 완료")
       else:
         logger.warning("서울 생활인구 데이터 응답 형식이 올바르지 않습니다.")

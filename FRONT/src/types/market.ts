@@ -11,12 +11,9 @@ export interface MarketDetailResponse {
   populationPerStore: number
   marketGrade: MarketGrade;
   description: string;
-}
-
-export interface WeightOption {
-  salesWeight: number;     // 매출 비중
-  stabilityWeight: number; // 안정성(폐업률) 비중
-  growthWeight: number;    // 성장률 비중
+  malePercent: number;
+  femalePercent: number;
+  ageGroup: string;
 }
 
 export interface MarketAnalysisRequest {

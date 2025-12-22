@@ -48,18 +48,25 @@ class MarketDataETL:
       cat_name = category["name"]
       cat_code = CATEGORY_CODES.get(cat_name)
       store_count = await self.api_client.fetch_store_count(session, adm_code, cat_code)
-      floating_pop = seoul_pop_map.get(adm_code, 0)
+      pop_info = seoul_pop_map.get(adm_code, {
+                "total": 0, "male": 0, "female": 0, "main_age_group": "정보없음"
+            })
 
       row_data = {
-        "region_id": region["region_id"],
-        "category_id": category["category_id"],
-        "created_at": datetime.now(),
-        "updated_at": datetime.now()
-      }
+                "region_id": region["region_id"],
+                "category_id": category["category_id"],
+                "store_count": store_count,
+                "floating_population": pop_info["total"], 
+                "male_population": pop_info["male"],
+                "female_population": pop_info["female"],
+                "main_age_group": pop_info["main_age_group"],
+                "created_at": datetime.now(),
+                "updated_at": datetime.now()
+            }
       
       metrics = self.calculator.calculate(
         store_count=store_count,
-        floating_pop=floating_pop
+        floating_pop=pop_info["total"]
       )
 
       row_data.update(metrics)
