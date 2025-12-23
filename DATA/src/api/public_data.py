@@ -63,25 +63,50 @@ class PublicDataClient:
       if "SPOP_LOCAL_RESD_DONG" in data:
         rows = data["SPOP_LOCAL_RESD_DONG"]["row"]
         for row in rows:
-          code = str(row["ADSTRD_CODE_SE"]) # ADSTRD_CODE_SE: 행정동코드
+          code = str(row["ADSTRD_CODE_SE"])
           total_pop = int(float(row["TOT_LVPOP_CO"]))
-          male_pop = int(float(row["MALE_LVPOP_CO"]))
-          female_pop = int(float(row["FEMALE_LVPOP_CO"]))
-          age_map = {
-            "10대": int(float(row.get("AGE_10_19_LVPOP_CO", 0))),
-            "20대": int(float(row.get("AGE_20_29_LVPOP_CO", 0))),
-            "30대": int(float(row.get("AGE_30_39_LVPOP_CO", 0))),
-            "40대": int(float(row.get("AGE_40_49_LVPOP_CO", 0))),
-            "50대": int(float(row.get("AGE_50_59_LVPOP_CO", 0))),
-            "60대이상": int(float(row.get("AGE_60_69_LVPOP_CO", 0))) + int(float(row.get("AGE_70_ABOVE_LVPOP_CO", 0)))
+          
+          male_pop = 0
+          female_pop = 0
+          age_counts = {
+            "10대": 0, "20대": 0, "30대": 0, 
+              "40대": 0, "50대": 0, "60대이상": 0
           }
-          main_age_group = max(age_map, key=age_map.get) # 인구수가 가장 많은 연령대
-          pop_map[code] = {
-              "total": total_pop,
-              "male": male_pop,
-              "female": female_pop,
-              "main_age_group": main_age_group
-          }
+
+          for key, val in row.items():
+            try:
+              val_num = int(float(val))
+            except (ValueError, TypeError):
+              continue
+            if "MALE" in key and "LVPOP" in key:
+              if "FEMALE" not in key:
+                male_pop += val_num
+              else:
+                female_pop += val_num
+            elif "FEMALE" in key and "LVPOP" in key:
+              female_pop += val_num
+
+            if "10T14" in key or "15T19" in key:
+              age_counts["10대"] += val_num
+            elif "20T24" in key or "25T29" in key:
+              age_counts["20대"] += val_num
+            elif "30T34" in key or "35T39" in key:
+              age_counts["30대"] += val_num
+            elif "40T44" in key or "45T49" in key:
+              age_counts["40대"] += val_num
+            elif "50T54" in key or "55T59" in key:
+              age_counts["50대"] += val_num
+            elif "60T64" in key or "65T69" in key or "70" in key:
+              age_counts["60대이상"] += val_num
+
+            age_group = max(age_counts, key=age_counts.get) # 인구수가 가장 많은 연령대
+
+            pop_map[code] = {
+                "total": total_pop,
+                "male": male_pop,
+                "female": female_pop,
+                "age_group": age_group
+            }
         logger.info(f"서울 생활 인구 데이터 {len(pop_map)}개 로드 완료")
       else:
         logger.warning("서울 생활인구 데이터 응답 형식이 올바르지 않습니다.")

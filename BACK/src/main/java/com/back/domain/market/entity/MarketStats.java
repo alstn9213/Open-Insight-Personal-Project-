@@ -42,7 +42,7 @@ public class MarketStats extends BaseTimeEntity {
 
     // 연령대 그룹 (예: "20대", "30대")
     @Column(length = 20)
-    private String AgeGroup;
+    private String ageGroup;
 
     @Column(name = "population_per_store")
     private Double populationPerStore;
