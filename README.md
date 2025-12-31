@@ -25,7 +25,7 @@
 | **ORM / DB** | **JPA, QueryDSL, MariaDB** | 복잡한 상권 검색 조건(동적 쿼리) 처리 및 데이터 무결성 보장 |
 | **Cache** | **Redis** | 변동 주기가 긴 상권 통계 데이터 캐싱으로 조회 성능 최적화 |
 | **Security** | **Spring Security, JWT** | Stateless한 인증 방식 구현 및 사용자 개인화 데이터 보호 |
-| **Data Eng.** | **Python, Pandas, Asyncio** | `aiohttp`를 활용한 공공데이터 고속 비동기 수집(ETL) 및 전처리 |
+| **Data** | **Python, Pandas, Asyncio** | `aiohttp`를 활용한 공공데이터 고속 비동기 수집(ETL) 및 전처리 |
 | **Frontend** | **React 19, TypeScript, Vite** | 컴포넌트 기반의 대시보드 설계 및 빠른 렌더링 최적화 |
 | **Styling** | **Tailwind CSS, daisyUI** | 직관적인 데이터 표현을 위한 유틸리티 퍼스트 디자인 |
 | **Visual** | **Chart.js, Kakao Map SDK** | 행정동별 유동인구 히트맵(Polygon) 및 비교 분석 차트 시각화 |
