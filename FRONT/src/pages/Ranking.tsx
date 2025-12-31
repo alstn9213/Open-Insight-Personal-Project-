@@ -77,12 +77,6 @@ const Ranking = () => {
             💎 틈새시장 Top 10
           </a>
           <a 
-            className={`tab ${currentSort === 'OVERCROWDED' ? 'tab-active bg-white shadow-sm font-bold text-red-500' : ''}`}
-            onClick={() => handleSortChange('OVERCROWDED')}
-          >
-            🔥 격전지 Top 10
-          </a>
-          <a 
             className={`tab ${currentSort === 'POPULATION' ? 'tab-active bg-white shadow-sm font-bold' : ''}`}
             onClick={() => handleSortChange('POPULATION')}
           >
