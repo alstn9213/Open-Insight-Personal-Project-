@@ -1,4 +1,4 @@
-package com.back.domain.member.controller;
+package com.back.api.member;
 
 import com.back.domain.member.dto.response.SignupRequest;
 import com.back.domain.member.service.MemberService;

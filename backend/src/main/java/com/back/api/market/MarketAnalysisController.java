@@ -1,4 +1,4 @@
-package com.back.domain.market.controller;
+package com.back.api.market;
 
 import com.back.domain.category.entity.Category;
 import com.back.domain.market.dto.request.MarketAnalysisRequest;

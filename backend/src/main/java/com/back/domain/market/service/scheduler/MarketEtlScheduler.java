@@ -15,8 +15,8 @@ public class MarketEtlScheduler {
     @Scheduled(cron = "0 0 4 * * *")
     public void runPythonEtl() {
         log.info("[Scheduler] 상권 데이터 수집 Python 실행");
-        String pythonExe = "C:\\kimminsu\\Open-Insight-Personal-Project-\\DATA\\venv\\Scripts\\python.exe"; // 가상환경 python
-        String scriptPath = "C:\\kimminsu\\Open-Insight-Personal-Project-\\DATA\\src\\etl\\market_collect.py";
+        String pythonExe = "C:\\kimminsu\\Open-Insight-Personal-Project-\\data\\venv\\Scripts\\python.exe"; // 가상환경 python
+        String scriptPath = "C:\\kimminsu\\Open-Insight-Personal-Project-\\data\\src\\etl\\market_collect.py";
         ProcessBuilder processBuilder = new ProcessBuilder(pythonExe, scriptPath);
 
         // Python 스크립트의 출력 로그를 캡처하기 위해 리다이렉트 설정
