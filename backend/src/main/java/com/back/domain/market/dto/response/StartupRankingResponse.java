@@ -1,6 +1,5 @@
 package com.back.domain.market.dto.response;
 
-import com.back.domain.market.entity.MarketStats;
 
 public record StartupRankingResponse(
         int rank,

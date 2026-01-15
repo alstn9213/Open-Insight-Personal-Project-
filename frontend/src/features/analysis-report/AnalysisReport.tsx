@@ -1,5 +1,5 @@
 import React from 'react';
-import type { MarketDetailResponse } from '../../market/types/market';
+import type { MarketDetailResponse } from '../../entities/market/types/market';
 
 interface AnalysisReportProps {
   marketDetail: MarketDetailResponse | null;

@@ -3,7 +3,7 @@ import { useInitialData } from '../hooks/useInitialData';
 import { useMarketAnalysis } from '../entities/market/hooks/useMarketAnalysis';
 import { CategorySelector } from '../features/analysis-header/components/CategorySelector';
 import { MapPanel } from '../entities/map/components/MapPanel';
-import { AnalysisReport } from '../entities/map/components/AnalysisReport';
+import { AnalysisReport } from '../features/analysis-report/AnalysisReport';
 
 export const Analysis = () => {
   const { categories, geoJson, initialLoading, error } = useInitialData();

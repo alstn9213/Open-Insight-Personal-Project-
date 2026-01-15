@@ -18,20 +18,7 @@ public interface MarketStatsRepository extends JpaRepository<MarketStats, Long>,
     Optional<MarketStats> findByAdmCodeAndCategoryId(@Param("admCode") String admCode,
                                                      @Param("categoryId") Long categoryId);
 
-    // 2. 특정 지역의 모든 업종 통계 조회 (예: 해당 지역에서 가장 뜨는 업종 찾기)
-    @Query("SELECT m FROM MarketStats m " +
-            "JOIN FETCH m.category c " +
-            "WHERE m.region.admCode = :admCode")
-    List<MarketStats> findAllByRegionAdmCode(@Param("admCode") String admCode);
-
-    // 3. 전체 데이터 조회 시에도 성능을 위해 Fetch Join 사용 (랭킹 알고리즘용)
-    // 데이터 양이 많다면 Paging 처리가 필요할 수 있습니다.
-    @Query("SELECT m FROM MarketStats m " +
-            "JOIN FETCH m.region r " +
-            "JOIN FETCH m.category c")
-    List<MarketStats> findAllWithDetails();
-
-    @Query("SELECT m FROM MarketStats m " +
+       @Query("SELECT m FROM MarketStats m " +
             "JOIN FETCH m.region r " +
             "WHERE r.province = :province AND m.category.id = :categoryId")
     List<MarketStats> findAllByProvinceAndCategoryId(@Param("province") String province,

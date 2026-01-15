@@ -1,12 +1,9 @@
-package com.back.api.market;
+package com.back.api;
 
 import com.back.domain.category.entity.Category;
-import com.back.domain.market.dto.request.MarketAnalysisRequest;
 import com.back.domain.market.dto.response.MarketDetailResponse;
 import com.back.domain.market.dto.response.MarketMapResponse;
-import com.back.domain.market.dto.response.StartupRankingResponse;
 import com.back.domain.market.service.analysis.MarketAnalysisService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,14 +27,6 @@ public class MarketAnalysisController {
         return ResponseEntity.ok(response);
     }
 
-    // 순위
-    @PostMapping("/ranking")
-    public ResponseEntity<List<StartupRankingResponse>> getMarketRankings(
-            @Valid @RequestBody MarketAnalysisRequest request
-    ) {
-        List<StartupRankingResponse> rankings = marketAnalysisService.getMarketRankings(request);
-        return ResponseEntity.ok(rankings);
-    }
 
     @GetMapping("/map-info")
     public ResponseEntity<List<MarketMapResponse>> getMapInfo(
