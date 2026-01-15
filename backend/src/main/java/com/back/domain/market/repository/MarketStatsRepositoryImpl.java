@@ -14,7 +14,7 @@ import static com.back.domain.region.entity.QRegion.region;
 @RequiredArgsConstructor
 public class MarketStatsRepositoryImpl implements MarketStatsRepositoryCustom {
 
-    private final JPAQueryFactory queryFactory;
+   private final JPAQueryFactory queryFactory;
 
 
     @Override
@@ -44,9 +44,4 @@ public class MarketStatsRepositoryImpl implements MarketStatsRepositoryCustom {
                 .fetch();
     }
     
-    @Override
-    public List<MarketStats> searchMarket(String province, Long categoryId, Long minSales) {
-        // TODO: Implement this method
-        return List.of();
-    }
 }

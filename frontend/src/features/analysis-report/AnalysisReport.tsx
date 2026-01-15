@@ -1,15 +1,18 @@
 import React from 'react';
-import type { MarketDetailResponse } from '../../entities/market/types/market';
+import { useMarketDetail } from '../../entities/market/hooks/useMarketDetail';
 
 interface AnalysisReportProps {
-  marketDetail: MarketDetailResponse | null;
-  isLoading: boolean;
+  categoryId: number | null;
+  regionCode: string | null;
 }
 
 export const AnalysisReport: React.FC<AnalysisReportProps> = ({
-  marketDetail,
-  isLoading,
+  categoryId,
+  regionCode,
 }) => {
+  const { marketDetail, isLoading, error } = useMarketDetail(regionCode, categoryId);
+
+  // 1. 로딩 상태
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -18,15 +21,33 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({
     );
   }
 
-  if (!marketDetail) {
+  // 2. 에러 상태
+  if (error) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-        <span className="text-4xl mb-2">👆</span>
-        <p>지도에서 지역을 클릭하면<br/>상세 분석 결과가 표시됩니다.</p>
+      <div className="flex flex-col items-center justify-center h-64 text-red-500">
+        <span className="text-3xl mb-2">⚠️</span>
+        <p className="font-semibold">상세 정보 로딩 실패</p>
+        <p className="text-sm mt-1">데이터를 불러오는 중 오류가 발생했습니다.</p>
       </div>
     );
   }
 
+  // 3. 데이터가 없는 초기 상태 또는 API 결과가 없는 상태
+  if (!marketDetail) {
+    const message = regionCode
+      ? "해당 지역의 분석 데이터가 없습니다."
+      : "지도에서 지역을 클릭하면<br/>상세 분석 결과가 표시됩니다.";
+    const icon = regionCode ? "🤔" : "👆";
+
+    return (
+      <div className="flex flex-col items-center justify-center h-64 text-gray-400 text-center">
+        <span className="text-4xl mb-2">{icon}</span>
+        <p dangerouslySetInnerHTML={{ __html: message }} />
+      </div>
+    );
+  }
+  
+  // 4. 데이터가 성공적으로 로드된 상태
   return (
     <div className="space-y-6 animate-fade-in">
       <div className="text-center mb-4">

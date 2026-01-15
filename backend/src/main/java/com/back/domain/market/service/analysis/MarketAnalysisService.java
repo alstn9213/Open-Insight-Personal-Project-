@@ -37,7 +37,7 @@ public class MarketAnalysisService {
 
     /**
      * 지도 시각화용 데이터 조회 (Key: province + categoryId)
-     * 특정 광역자치단체(province) 내의 모든 구/군별 통계 데이터를 반환합니다.
+     * 특정 광역자치단체(province) 내의 모든 구/군별 통계 데이터를 반환.
      * 데이터 양이 많아(List) DB 부하가 큰 작업이므로 캐싱 효과가 큼
      */
     @Cacheable(value = "marketMap", key = "#province + '_' + #categoryId")

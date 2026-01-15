@@ -10,6 +10,5 @@ public interface MarketStatsRepositoryCustom {
 
     List<MarketStats> findAllByProvinceAndCategoryId(String province, Long categoryId);
     
-    List<MarketStats> searchMarket(String province, Long categoryId, Long minSales);
 
 }
