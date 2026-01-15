@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 @Service
@@ -26,6 +27,12 @@ public class MarketAnalysisService {
     private final MarketStatsRepository marketStatsRepository;
     private final CategoryRepository categoryRepository;
 
+    private static final double THRESHOLD_OPPORTUNITY = 500.0;
+    private static final double THRESHOLD_OVERCROWDED = 50.0;
+    private static final String BADGE_OPPORTUNITY = "기회";
+    private static final String BADGE_OVERCROWDED = "과열";
+    private static final String BADGE_NORMAL = "보통";
+
     // 상권 상세 분석
     @Cacheable(value = "marketAnalysis", key = "#admCode + '_' + #categoryId")
     public MarketDetailResponse getAnalysis(String admCode, Long categoryId) {
@@ -35,45 +42,16 @@ public class MarketAnalysisService {
     }
 
     // 점포당 고객 밀도가 널널한 지역과 업종 순위
-    @Transactional(readOnly = true)
     public List<StartupRankingResponse> getMarketRankings(MarketAnalysisRequest request) {
-        List<MarketStats> allStats;
+        List<MarketStats> statsList = fetchStats(request);
 
-        // 사용자가 아무런 필터를 선택하지 않았을 때,
-        if(request.admCode() == null) {
-            allStats = marketStatsRepository.findAllWithDetails(); // 서울시 전체 순위 불러오기
-        } else {
-            allStats = marketStatsRepository.findAllByRegionAdmCode(request.admCode());
-        }
-
-        Stream<MarketStats> stream = allStats.stream()
-                .filter(stats -> stats.getStoreCount() > 0); // 기본 필터링
-
-        stream = switch (request.sortOption()) {
-            case OPPORTUNITY -> stream.sorted((s1, s2) -> Double.compare(getPopPerStore(s2), getPopPerStore(s1))); // 내림차순
-            case OVERCROWDED -> stream.sorted((s1, s2) -> Double.compare(getPopPerStore(s1), getPopPerStore(s2))); // 오름차순
-            case POPULATION  -> stream.sorted(Comparator.comparingInt(MarketStats::getFloatingPopulation).reversed());
-            case STORE_COUNT -> stream.sorted(Comparator.comparingInt(MarketStats::getStoreCount).reversed());
-        };
-
-        return stream.limit(10)
-                .map(stats -> {
-                    double popPerStore = (double) stats.getFloatingPopulation() / Math.max(stats.getStoreCount(), 1);
-                    String badge = "보통";
-                    if(popPerStore >= 500.0) badge = "기회";
-                    else if(popPerStore < 50.0) badge = "과열";
-
-                    return new StartupRankingResponse(
-                            0, // 순위: 여기서는 알 수 없으므로 0으로 두고, 리스트 반환 후 인덱스를 매기거나 클라이언트에서 처리
-                            stats.getRegion().getProvince() + " " + stats.getRegion().getDistrict(),
-                            stats.getCategory().getName(),
-                            stats.getStoreCount(),
-                            stats.getFloatingPopulation(),
-                            Math.round(popPerStore * 10) / 10.0,
-                            badge
-                    );
-                })
+        List<MarketStats> topRankedStats = statsList.stream()
+                .filter(stats -> stats.getStoreCount() > 0)
+                .sorted(resolveComparator(request))
+                .limit(10)
                 .toList();
+
+        return mapToRankingResponses(topRankedStats);
     }
 
     /**
@@ -98,6 +76,46 @@ public class MarketAnalysisService {
     // --- 내부 메서드 ---
     private double getPopPerStore(MarketStats stats) {
         return (double) stats.getFloatingPopulation() / Math.max(stats.getStoreCount(), 1);
+    }
+
+    private List<MarketStats> fetchStats(MarketAnalysisRequest request) {
+        if (request.admCode() == null) {
+            return marketStatsRepository.findAllWithDetails(); // 서울시 전체 순위 불러오기
+        }
+        return marketStatsRepository.findAllByRegionAdmCode(request.admCode());
+    }
+
+    private Comparator<MarketStats> resolveComparator(MarketAnalysisRequest request) {
+        return switch (request.sortOption()) {
+            case OPPORTUNITY -> (s1, s2) -> Double.compare(getPopPerStore(s2), getPopPerStore(s1)); // 내림차순
+            case OVERCROWDED -> (s1, s2) -> Double.compare(getPopPerStore(s1), getPopPerStore(s2)); // 오름차순
+            case POPULATION -> Comparator.comparingInt(MarketStats::getFloatingPopulation).reversed();
+            case STORE_COUNT -> Comparator.comparingInt(MarketStats::getStoreCount).reversed();
+        };
+    }
+
+    private List<StartupRankingResponse> mapToRankingResponses(List<MarketStats> statsList) {
+        return IntStream.range(0, statsList.size())
+                .mapToObj(index -> {
+                    MarketStats stats = statsList.get(index);
+                    double popPerStore = getPopPerStore(stats);
+                    return new StartupRankingResponse(
+                            index + 1,
+                            stats.getRegion().getProvince() + " " + stats.getRegion().getDistrict(),
+                            stats.getCategory().getName(),
+                            stats.getStoreCount(),
+                            stats.getFloatingPopulation(),
+                            Math.round(popPerStore * 10) / 10.0,
+                            resolveBadge(popPerStore)
+                    );
+                })
+                .toList();
+    }
+
+    private String resolveBadge(double popPerStore) {
+        if (popPerStore >= THRESHOLD_OPPORTUNITY) return BADGE_OPPORTUNITY;
+        if (popPerStore < THRESHOLD_OVERCROWDED) return BADGE_OVERCROWDED;
+        return BADGE_NORMAL;
     }
 
 }
