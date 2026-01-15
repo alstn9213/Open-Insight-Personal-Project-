@@ -1,7 +1,7 @@
-import { GRADE_COLORS } from "../../constants/map";
+import { GRADE_COLORS } from "../../../shared/constants/map";
 
 // 범례 컴포넌트 (지도 위에 둥둥 떠있는 상자)
-const MapLegend = () => {
+export const MapLegend = () => {
   return (
     <div className="absolute top-8 right-8 z-[100] bg-white/95 p-4 rounded-xl shadow-xl border border-gray-200 backdrop-blur-sm">
       <h4 className="text-sm font-bold mb-3 text-gray-800 border-b pb-2">
@@ -42,5 +42,3 @@ const MapLegend = () => {
     </div>
   );
 };
-
-export default MapLegend;
