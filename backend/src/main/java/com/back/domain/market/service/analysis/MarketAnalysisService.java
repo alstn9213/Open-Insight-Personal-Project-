@@ -2,9 +2,12 @@ package com.back.domain.market.service.analysis;
 
 import com.back.domain.category.entity.Category;
 import com.back.domain.category.repository.CategoryRepository;
-import com.back.domain.market.entity.MarketStats;
 import com.back.domain.market.dto.response.MarketDetailResponse;
 import com.back.domain.market.dto.response.MarketMapResponse;
+import com.back.domain.market.entity.MarketStats;
+import com.back.domain.market.error.exception.MarketAnalysisNotFoundException;
+
+import com.back.domain.market.mapper.MarketDetailMapper;
 import com.back.domain.market.repository.MarketStatsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -21,13 +24,14 @@ public class MarketAnalysisService {
 
     private final MarketStatsRepository marketStatsRepository;
     private final CategoryRepository categoryRepository;
+    private final MarketDetailMapper marketDetailMapper;
 
     // 상권 상세 분석
     @Cacheable(value = "marketAnalysis", key = "#admCode + '_' + #categoryId")
     public MarketDetailResponse getAnalysis(String admCode, Long categoryId) {
         MarketStats stats = marketStatsRepository.findByAdmCodeAndCategoryId(admCode,categoryId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 지역 및 업종에 대한 분석 데이터가 없습니다."));
-        return MarketDetailResponse.from(stats);
+                .orElseThrow(MarketAnalysisNotFoundException::new);
+        return marketDetailMapper.toDetailResponse(stats);
     }
 
 
@@ -39,6 +43,9 @@ public class MarketAnalysisService {
     @Cacheable(value = "marketMap", key = "#province + '_' + #categoryId")
     public List<MarketMapResponse> getMapInfo(String province, Long categoryId) {
         List<MarketStats> statsList = marketStatsRepository.findAllByProvinceAndCategoryId(province, categoryId);
+        if (statsList.isEmpty()) {
+            throw new MarketAnalysisNotFoundException();
+        }
 
         return statsList.stream()
                 .map(MarketMapResponse::from)

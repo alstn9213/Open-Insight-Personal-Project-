@@ -54,9 +54,7 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
-        // JWT 관련 헤더 노출 (나중에 토큰을 헤더로 보낼 경우 필요)
-        config.addExposedHeader("Authorization");
-
+    
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
