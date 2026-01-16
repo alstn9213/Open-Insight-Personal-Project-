@@ -48,7 +48,6 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({
 }) => {
   const { marketDetail, isLoading, error } = useMarketDetail(regionCode, categoryId);
 
-  // 1. 로딩 상태
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -57,7 +56,6 @@ export const AnalysisReport: React.FC<AnalysisReportProps> = ({
     );
   }
 
-  // 2. 에러 상태
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-red-500">
