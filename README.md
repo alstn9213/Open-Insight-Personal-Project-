@@ -35,9 +35,8 @@
 
 1.  **ETL Pipeline (Python):** `aiohttp`를 이용해 서울시 열린데이터 광장(유동인구) 및 공공데이터포털(상가정보) API에서 데이터를 비동기로 수집합니다. 
     * *Key Logic:* 행정동 단위로 데이터를 매핑하고, 결측치를 정제하여 신뢰도 높은 데이터셋을 구축합니다.
-2.  **Scheduler (Spring Boot):** 매일 새벽 `MarketEtlScheduler`가 Python 스크립트를 트리거하여 최신 데이터 현황을 DB에 업데이트합니다.
-3.  **API Service:** 사용자가 특정 지역/업종을 조회하면 QueryDSL을 통해 조건에 맞는 통계 데이터를 추출하고, Redis를 통해 응답 속도를 가속화합니다.
-4.  **Client:** GeoJSON을 활용하여 지도 위에 **업소 밀도**와 **유동인구 분포**를 시각적으로 렌더링합니다.
+2.  **API Service:** 사용자가 특정 지역/업종을 조회하면 QueryDSL을 통해 조건에 맞는 통계 데이터를 추출하고, Redis를 통해 응답 속도를 가속화합니다.
+3.  **Client:** GeoJSON을 활용하여 지도 위에 **업소 밀도**와 **유동인구 분포**를 시각적으로 렌더링합니다.
 
 <br/>
 
@@ -52,38 +51,18 @@
 
 <br/>
 
-## 실행 방법 (Getting Started)
+## 시연
 
-### Backend
+![alt text](images/카테고리.gif)
+<br/>
 
-```bash
-cd BACK
-./gradlew clean build
-java -jar build/libs/BACK-0.0.1-SNAPSHOT.jar
+업종을 선택하면, 서울시 지도 위에 색깔로 구분된 해당 업종의 포화도를 표시해, 해당 지역 내에서 업종별 경쟁 상황을 직관적으로 알 수 있습니다.
 
-```
+![alt text](images/지역바꾸기.gif)
+<br/>
 
-### Frontend
+해당 지역의 상세한 정보를 알고 싶다면 지도에 표시된 지역을 클릭하면 됩니다. 그럼 지도 우측에 선택한 업종의 점포가 지역 내에 얼마나 있는지, 해당 지역의 유동인구, 남녀비, 주요 연령층 등의 정보를 보여줍니다.
 
-```bash
-cd FRONT
-npm install
-npm run dev
-
-```
-
-### Data Pipeline (Optional)
-
-```bash
-cd DATA
-python -m venv venv
-# Windows: venv\Scripts\activate
-source venv/bin/activate  
-pip install -r requirements.txt
-python src/etl/init_data.py  # 기초 데이터(지역/업종) 적재
-python src/etl/market_collect.py # 공공데이터 수집 및 적재
-
-```
 
 ## 👨‍💻 Developer
 

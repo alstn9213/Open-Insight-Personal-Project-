@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useInitialData } from '../hooks/useInitialData';
-import { CategorySelector } from '../features/analysis-header/components/CategorySelector';
 import { MapPanel } from '../entities/map/components/MapPanel';
 import { AnalysisReport } from '../features/analysis-report/AnalysisReport';
+import { AnalysisHeader } from '../features/analysis-header/components/AnalysisHeader';
 
 export const Analysis = () => {
   // 1. 페이지에 필요한 초기 데이터(GeoJSON, 카테고리 목록) 로드
@@ -48,18 +48,12 @@ export const Analysis = () => {
   // 4. 상태와 핸들러를 각자 필요한 자식 컴포넌트에 props로 전달하여 조립
   return (
     <div className="flex flex-col h-screen p-4 gap-4 bg-gray-50">
-      
-      <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-          🗺️ 상권 분석
-        </h1>
-        <CategorySelector
-          categories={categories}
-          selectedCategoryId={selectedCategoryId}
-          onCategoryChange={handleCategoryChange}
-          disabled={initialLoading}
-        />
-      </div>
+      <AnalysisHeader
+        categories={categories}
+        selectedCategoryId={selectedCategoryId}
+        onCategoryChange={handleCategoryChange}
+        disabled={initialLoading}
+      />
 
       <div className="flex flex-1 gap-4 overflow-hidden">
         <MapPanel
