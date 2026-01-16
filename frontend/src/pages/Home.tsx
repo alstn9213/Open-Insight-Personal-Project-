@@ -1,4 +1,4 @@
-import { ArrowRight, BarChart3, Map, ShieldCheck, TrendingUp } from "lucide-react";
+import {  Map, TrendingUp } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Home = () => {

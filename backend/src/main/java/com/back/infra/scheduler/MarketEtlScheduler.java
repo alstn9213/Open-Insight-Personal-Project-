@@ -1,4 +1,4 @@
-package com.back.domain.market.service.scheduler;
+package com.back.infra.scheduler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

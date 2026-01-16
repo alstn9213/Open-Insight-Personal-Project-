@@ -5,7 +5,7 @@ import com.back.domain.market.dto.request.MarketAnalysisRequest;
 import com.back.domain.market.dto.response.MarketDetailResponse;
 import com.back.domain.market.dto.response.MarketMapResponse;
 import com.back.domain.market.dto.response.StartupRankingResponse;
-import com.back.domain.market.service.analysis.MarketAnalysisService;
+import com.back.domain.market.service.MarketAnalysisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,4 +1,4 @@
-package com.back.domain.market.service.analysis;
+package com.back.domain.market.service;
 
 import com.back.domain.category.entity.Category;
 import com.back.domain.category.repository.CategoryRepository;
@@ -35,7 +35,6 @@ public class MarketAnalysisService {
     }
 
     // 점포당 고객 밀도가 널널한 지역과 업종 순위
-    @Transactional(readOnly = true)
     public List<StartupRankingResponse> getMarketRankings(MarketAnalysisRequest request) {
         List<MarketStats> allStats;
 
