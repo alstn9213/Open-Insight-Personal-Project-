@@ -1,236 +1,84 @@
-import { useState, useEffect } from "react";
-import AnalysisMap from "../components/map/AnalysisMap";
-import type { GeoJsonCollection, MarketMapData } from "../types/map";
-import type { Category, MarketDetailResponse } from "../types/market";
-import { marketApi } from "../api/marketApi";
+import { useState, useEffect } from 'react';
+import { useInitialData } from '../hooks/useInitialData';
+import { CategorySelector } from '../features/analysis-header/components/CategorySelector';
+import { MapPanel } from '../entities/map/components/MapPanel';
+import { AnalysisReport } from '../features/analysis-report/AnalysisReport';
 
-const Analysis = () => {
+export const Analysis = () => {
+  // 1. 페이지에 필요한 초기 데이터(GeoJSON, 카테고리 목록) 로드
+  const { categories, geoJson, initialLoading, error: initialDataError } = useInitialData();
+
+  // 2. 여러 자식 컴포넌트가 공유하는 핵심 상태만 관리
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
   const [selectedRegionCode, setSelectedRegionCode] = useState<string | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
 
-  const [geoJson, setGeoJson] = useState<GeoJsonCollection | null>(null);
-  const [mapData, setMapData] = useState<MarketMapData[]>([]);
-  const [marketDetail, setMarketDetail] = useState<MarketDetailResponse | null>(null);
-
-  const [loading, setLoading] = useState(false);
-  const [mapLoading, setMapLoading] = useState(false);
-
-  const DEFAULT_PROVINCE = "서울특별시";
-
-  // 초기 데이터 로드
+  // 초기 카테고리가 로드되면 첫 번째 항목을 기본값으로 설정
   useEffect(() => {
-    const initData = async () => {
-      try {
-        const [geoResponse, categoryResponse]= await Promise.all([
-          fetch("/assets/geojson/HangJeongDong_ver20250401.geojson"),
-          marketApi.getCategories()
-        ]);
-        if(!geoResponse.ok) throw new Error("GeoJSON 로드 실패.");
-        // 서울지역(행정동 코드 11)만 필터링
-        const geoData = await geoResponse.json();
-        const seoulFeatures = geoData.features.filter((feature: any) => {
-          const admCode = String(feature.properties.adm_cd);
-          return admCode.startsWith("11");
-        });
-        // 필터링된 features로 GeoJSON 설정
-        setGeoJson({...geoData, features: seoulFeatures});
-        setCategories(categoryResponse);
-        if(categoryResponse.length > 0) {
-          setSelectedCategoryId(categoryResponse[0].id);
-        }
-      } catch (error) {
-        console.error("초기 데이터 로드 실패:", error);
-      }
-    };
-    initData();
-  }, []);
-
-  // 업종 카테고리가 변경될 때마다 지도 정보 업데이트
-  useEffect(() => {
-    const fetchMapData = async () => {
-      if(!selectedCategoryId) return;
-      setMapLoading(true);
-      try {
-        const data = await marketApi.getMapInfo(DEFAULT_PROVINCE, selectedCategoryId);
-        setMapData(data);
-      } catch(error) {
-        console.error("지도 데이터 로드 실패:", error);
-      } finally {
-        setMapLoading(false);
-      }
-    };
-    fetchMapData();
-  }, [selectedCategoryId]);
-
-  // 지역 선택시 나타나는 상세 분석 핸들러
-  const handleSelectRegion = async (admCode: string) => {
-    setSelectedRegionCode(admCode);
-    await fetchMarketDetail(admCode, selectedCategoryId);
-  };
-
-  // 상세 정보 로드 함수
-  const fetchMarketDetail = async (admCode: string, categoryId: number) => {
-    setLoading(true);
-    setMarketDetail(null);
-    try {
-      const data = await marketApi.getMarketAnalysis(admCode, categoryId);
-      setMarketDetail(data);
-    } catch(error) {
-      console.error("상세 분석 데이터 로드 실패:", error);
-    } finally {
-      setLoading(false);
+    if (categories.length > 0 && selectedCategoryId === null) {
+      setSelectedCategoryId(categories[0].id);
     }
-  };
+  }, [categories, selectedCategoryId]);
 
-  // 카테고리 변경 핸들러
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCategoryId = Number(e.target.value);
+  // 3. 자식 컴포넌트의 이벤트를 받아 상태를 업데이트하는 핸들러
+  const handleCategoryChange = (newCategoryId: number) => {
     setSelectedCategoryId(newCategoryId);
-    // 이미 지역을 선택했다면 상세 분석 정보도 갱신
-    if(selectedRegionCode) {
-      fetchMarketDetail(selectedRegionCode, newCategoryId);
-    }
   };
 
+  const handleSelectRegion = (admCode: string) => {
+    setSelectedRegionCode(admCode);
+  };
+
+  // 초기 데이터 로딩/에러는 페이지 전체에 영향을 주므로 여기서 처리
+  if (initialLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
+
+  if (initialDataError) {
+    return (
+      <div className="flex justify-center items-center h-screen text-red-500">
+        Error
+      </div>
+    );
+  }
+
+  // 4. 상태와 핸들러를 각자 필요한 자식 컴포넌트에 props로 전달하여 조립
   return (
     <div className="flex flex-col h-screen p-4 gap-4 bg-gray-50">
-      {/* 상단 헤더 영역: 제목 및 필터 */}
+      
       <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-200">
         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
           🗺️ 상권 분석
         </h1>
-        
-        {/* 업종 선택 드롭다운 (DaisyUI Select) */}
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-600">분석 업종:</span>
-          <select 
-            className="select select-bordered select-sm w-full max-w-xs"
-            value={selectedCategoryId}
-            onChange={handleCategoryChange}
-            disabled={categories.length === 0}
-          >
-            {categories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CategorySelector
+          categories={categories}
+          selectedCategoryId={selectedCategoryId}
+          onCategoryChange={handleCategoryChange}
+          disabled={initialLoading}
+        />
       </div>
 
       <div className="flex flex-1 gap-4 overflow-hidden">
-        {/* 왼쪽: 지도 영역 */}
-        <div className="w-2/3 h-full rounded-xl overflow-hidden shadow-lg border border-gray-200 relative bg-white">
-          {mapLoading && (
-             <div className="absolute inset-0 z-10 bg-white/50 flex justify-center items-center">
-                <span className="loading loading-spinner text-primary"></span>
-             </div>
-          )}
-          <AnalysisMap
-            mapData={mapData}
-            geoJson={geoJson}
-            onSelectRegion={handleSelectRegion}
-          />
-        </div>
+        <MapPanel
+          categoryId={selectedCategoryId}
+          geoJson={geoJson}
+          onSelectRegion={handleSelectRegion}
+        />
         
-        {/* 오른쪽: 상세 정보 패널 */}
         <div className="w-1/3 h-full bg-white p-6 rounded-xl shadow-lg border border-gray-200 overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4 border-b pb-2">
             상세 분석 리포트
           </h2>
-
-          {loading ? (
-            <div className="flex justify-center items-center h-64">
-              <span className="loading loading-spinner loading-lg text-primary"></span>
-            </div>
-          ) : marketDetail ? (
-            <div className="space-y-6 animate-fade-in">
-              
-              {/* 1. 지역 및 업종 정보 */}
-              <div className="text-center mb-4">
-                <h3 className="text-2xl font-bold text-gray-800">{marketDetail.regionName}</h3>
-                <p className="text-gray-500 font-medium">{marketDetail.categoryName} 분석 결과</p>
-              </div>
-
-            
-              {/* 2. 핵심 요약 카드 */}
-              <div className="stats shadow mb-6 w-full">
-  
-                <div className="stat place-items-center">
-                  <div className="stat-title">경쟁 점포 수</div>
-                  <div className="stat-value text-secondary text-2xl">
-                    {marketDetail.storeCount.toLocaleString()}개
-                  </div>
-                  <div className="stat-desc">선택 지역 내</div>
-                </div>
-                
-                <div className="stat place-items-center">
-                  <div className="stat-title">잠재 고객(유동)</div>
-                  <div className="stat-value text-secondary text-2xl">
-                    {(marketDetail.floatingPopulation / 10000).toFixed(1)}만명
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. 인구 통계 */}
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
-                <h4 className="text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
-                   👥 인구 통계
-                </h4>
-
-                <div className="space-y-4">
-                  {/* 성별 분포 시각화 */}
-                  <div>
-                    <div className="flex justify-between text-xs text-gray-500 mb-1">
-                      <span className="text-blue-600 font-bold">👨 남성 {marketDetail.malePercent}%</span>
-                      <span className="text-pink-600 font-bold">👩 여성 {marketDetail.femalePercent}%</span>
-                    </div>
-                    <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden flex shadow-inner">
-                      <div 
-                        className="h-full bg-blue-400 transition-all duration-1000" 
-                        style={{ width: `${marketDetail.malePercent}%` }}
-                      />
-                      <div 
-                        className="h-full bg-pink-400 transition-all duration-1000" 
-                        style={{ width: `${marketDetail.femalePercent}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* 주요 연령대 */}
-                  <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-100 shadow-sm">
-                    <span className="text-sm text-gray-500">주 이용 연령층</span>
-                    <div className="flex items-center gap-2">
-                       <span className="badge badge-primary badge-lg font-bold">
-                         {marketDetail.ageGroup}
-                       </span>
-                       <span className="text-xs text-gray-400">비중 1위</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 핵심 지표 하이라이트 */}
-              <div className="alert shadow-lg bg-base-100 border-l-4 border-primary">
-                <div>
-                  <h3 className="font-bold">점포 1곳당 약 {Math.round(marketDetail.populationPerStore)}명의 유동인구</h3>
-                  <div className="text-xs text-gray-500">
-                    이 수치가 높을수록 영업하기 유리한 환경입니다.
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-gray-400">
-              <span className="text-4xl mb-2">👆</span>
-              <p>지도에서 지역을 클릭하면<br/>상세 분석 결과가 표시됩니다.</p>
-            </div>
-          )}
+          <AnalysisReport 
+            categoryId={selectedCategoryId}
+            regionCode={selectedRegionCode} 
+          />
         </div>
       </div>
     </div>
   );
 };
 
-export default Analysis;

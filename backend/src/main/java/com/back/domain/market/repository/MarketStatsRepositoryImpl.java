@@ -1,43 +1,47 @@
 package com.back.domain.market.repository;
 
 import com.back.domain.market.entity.MarketStats;
-import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.back.domain.market.entity.QMarketStats.marketStats;
+import static com.back.domain.category.entity.QCategory.category;
+import static com.back.domain.region.entity.QRegion.region;
 
-@Repository
 @RequiredArgsConstructor
 public class MarketStatsRepositoryImpl implements MarketStatsRepositoryCustom {
 
-    private final JPAQueryFactory queryFactory;
+   private final JPAQueryFactory queryFactory;
+
 
     @Override
-    public List<MarketStats> searchMarket(String province, Long categoryId, Long minSales) {
+    public Optional<MarketStats> findByAdmCodeAndCategoryId(String admCode, Long categoryId) {
+        MarketStats result = queryFactory
+                .selectFrom(marketStats)
+                .join(marketStats.region, region).fetchJoin()
+                .join(marketStats.category, category).fetchJoin()
+                .where(
+                        region.admCode.eq(admCode),
+                        category.id.eq(categoryId)
+                )
+                .fetchOne();
+        return Optional.ofNullable(result);
+    }
+
+    @Override
+    public List<MarketStats> findAllByProvinceAndCategoryId(String province, Long categoryId) {
         return queryFactory
                 .selectFrom(marketStats)
-                .join(marketStats.region).fetchJoin()
-                .join(marketStats.category).fetchJoin()
+                .join(marketStats.region, region).fetchJoin()
+                .join(marketStats.category, category).fetchJoin()
                 .where(
-                        eqProvince(province),
-                        eqCategory(categoryId)
+                        region.province.eq(province),
+                        category.id.eq(categoryId)
                 )
                 .fetch();
     }
-
-    private BooleanExpression eqProvince(String province) {
-        return province != null
-                ? marketStats.region.province.eq(province)
-                : null;
-    }
-
-    private BooleanExpression eqCategory(Long categoryId) {
-        return categoryId != null
-                ? marketStats.category.id.eq(categoryId)
-                : null;
-    }
+    
 }
